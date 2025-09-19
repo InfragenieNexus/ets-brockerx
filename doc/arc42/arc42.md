@@ -1,17 +1,18 @@
 # Calculatrice - Documentation d'Architecture
-Ce document, basé sur le modèle arc42, décrit une application calculatrice pour le Labo 00, LOG430.
+Ce document, basé sur le modèle arc42, décrit une application de courtage pour la compagnie BrockerX dans le cadre du 
+LOG430.
 
 ## 1. Introduction et Objectifs
 
 ### Panorama des exigences
-L'application « Calculatrice » est une application Python simple pour effectuer des opérations mathématiques de base (addition, soustraction, multiplication et division). Elle sert de projet éducatif pour démontrer :
-- L'utilisation de conteneurs avec Docker
-- L'écriture et l'exécution de tests automatisés avec pytest
-- La mise en place d'un pipeline CI/CD avec GitLab et Docker
-- L'accès à un serveur via SSH et la vérification des ressources computationnelles
-- La combinaison d'outils de développement modernes (VS Code, Git, Docker)
+L'application « BrockerX » est une plateforme de courtage en ligne permettant aux investisseurs de: 
+- Créer et gérer un compte utilisateur
+- Authentifier et sécuriser l'accès 
+- Placer, consulter et annuler des ordres d'achat/vente
+- Consulter un portefeuille et l'historique des transactions
 
-Cette calculatrice est volontairement simple afin de se concentrer sur la création et la maintenance d'un pipeline CI/CD. L'architecture évoluera dans les laboratoires suivants.
+L'objectif de la phase 1 est de concevoir et livrer une architecture monolithique évolutive, tout en préparant une
+transition future vers une architecture Micro-service et pour finalement ce penché vers une approche orientée événements
 
 ### Objectifs qualité
 | Priorité | Objectif qualité | Scénario |
@@ -21,8 +22,12 @@ Cette calculatrice est volontairement simple afin de se concentrer sur la créat
 | 3 | **Maintenabilité** | Code simple et bien structuré pour faciliter l'évolution |
 
 ### Parties prenantes (Stakeholders)
-- **Développeur.euses** : Apprendre les outils de développement modernes et les pipelines CI/CD
-- **Utilisateur.trices** : Bénéficiaires des calculs mathématiques de base
+- **SoftWare engineer** : Apprendre les outils de développement modernes et les pipelines CI/CD
+- **Clients** : utilisateurs via interface web
+- **Opérations Back-Office**: gestion des règlements, supervision
+- **Conformité/Risque** : surveillance pré- et post-trade.
+- **Fournisseurs de données de marché**: cotations en temps réel.
+- **Bourse externes**: simulateurs de marché pour routage d'ordres
 
 ## 2. Contraintes d'architecture
 
@@ -33,6 +38,22 @@ Cette calculatrice est volontairement simple afin de se concentrer sur la créat
 | **Éducatif** | L'application doit démontrer clairement les concepts d'infrastructure et CI/CD |
 
 ## 3. Portée et contexte du système
+
+# Priorisation des Cas d’Utilisation (MoSCoW)
+
+| Priorité | Cas d’Utilisation (CU) | Description |
+|----------|-------------------------|-------------|
+| **Must have** | CU01 – Authentification | Connexion sécurisée avec MFA |
+|              | CU02 – Passer un ordre | Achat/vente d’actions en bourse |
+|              | CU03 – Consulter portefeuille | Solde et positions en temps réel |
+|              | CU04 – Flux marché | Cotations en temps réel |
+| **Should have** | CU05 – Historique transactions | Liste détaillée des ordres exécutés |
+|                | CU06 – Notifications | Alertes pour exécution, risque, solde bas |
+| **Could have** | CU07 – Mode sombre | Thème alternatif pour l’interface |
+|                | CU08 – Export rapports | Export en PDF/Excel |
+| **Won’t have (this time)** | CU09 – Trading social | Copier les ordres d’autres utilisateurs |
+|                           | CU10 – Intégration crypto | Achat/vente de crypto-monnaies |
+
 
 ### Contexte métier
 ![Activity](activity.png)
