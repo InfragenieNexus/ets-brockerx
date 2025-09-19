@@ -17,11 +17,9 @@ FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-# Copier le JAR depuis l'étape builder
 COPY --from=builder /app/target/BrockerX-0.0.1-SNAPSHOT.jar app.jar
 
-# Exposer le port Spring Boot
+
 EXPOSE 8080
 
-# Commande pour lancer l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
