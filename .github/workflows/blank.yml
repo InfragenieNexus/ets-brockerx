@@ -30,7 +30,7 @@ jobs:
 
 
       - name: Build with Maven
-        run: mvnw clean package -DskipTests
+        run: ./mvnw clean package -DskipTests
 
       # 4️⃣ Message de test
       - name: Echo test
