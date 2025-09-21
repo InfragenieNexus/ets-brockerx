@@ -1,4 +1,4 @@
-FROM tomcat:10-jakarta
+FROM tomcat:10.1.13-jdk17
 
 # Supprimer la webapp par défaut
 RUN rm -rf /usr/local/tomcat/webapps/*
