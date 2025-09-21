@@ -12,8 +12,4 @@ public class BrockerXApplication {
         SpringApplication.run(BrockerXApplication.class, args);
     }
 
-    @GetMapping("/")
-    public String home() {
-        return "Hello world!";
-    }
 }
