@@ -1,25 +1,11 @@
-# Étape 1 : utiliser une image JDK pour builder/packager
-FROM eclipse-temurin:21-jdk-jammy AS builder
+FROM tomcat:10-jakarta
 
-# Définir le dossier de travail
-WORKDIR /app
+# Supprimer la webapp par défaut
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copier le pom.xml et le code source
-COPY pom.xml .
-COPY src ./src
-
-# Builder le JAR avec Maven
-RUN apt-get update && apt-get install -y maven \
-    && mvn clean package -DskipTests
-
-# Étape 2 : image légère pour exécuter le JAR
-FROM eclipse-temurin:21-jre-jammy
-
-WORKDIR /app
-
-COPY --from=builder /app/target/BrockerX-0.0.1-SNAPSHOT.jar app.jar
-
+# Copier ton WAR généré
+COPY target/BrockerX-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Tomcat démarre automatiquement

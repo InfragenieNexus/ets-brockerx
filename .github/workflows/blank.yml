@@ -8,52 +8,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: self-hosted
-    steps:
-      # Checkout du code
-      - uses: actions/checkout@v4
-
-      # Installer Java/Maven
-      - name: Set up Java 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: 'maven'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
-
-      # 4️⃣ Message de test
-      - name: Echo test
-        run: echo "Build terminé !"
-
   deploy:
     runs-on: self-hosted
-    needs: build
     steps:
-      # Checkout du code pour le déploiement
+      # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
+      # 2️⃣ Déploiement Docker
       - name: Déploiement local
         run: |
           cd $GITHUB_WORKSPACE
-          echo "Déploiement sur la VM en cours..."
           docker compose down || true
           docker compose up -d --build
+
           # 👇 attendre que la DB soit prête
           echo "Waiting for DB..."
-          until docker exec brockerx-db pg_isready -U brokerx; do
+          until docker exec brockerx-db-1 pg_isready -U brokerx; do
             sleep 5
             echo "DB not ready yet..."
           done
-      
+
+      - name: Test déploiement
+        run: curl http://localhost:8080 || echo "App pas encore prête"

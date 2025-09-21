@@ -12,6 +12,7 @@
     <artifactId>BrockerX</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>BrockerX</name>
+    <packaging>war</packaging>
     <description>BrockerX</description>
     <url/>
     <licenses>
