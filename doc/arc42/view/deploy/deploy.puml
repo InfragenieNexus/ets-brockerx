@@ -1,0 +1,34 @@
+@startuml
+left to right direction
+
+actor "Client Web" as Client
+
+node "VM Ubuntu Linux (self-hosted)" as VM {
+
+  folder "Docker" {
+
+    node "Conteneur BrokerX (Spring Boot / Tomcat)" as BrockerX {
+      artifact "brokerx.war" as WAR
+      note right
+        Ports exposés: 8080
+        DB URL: jdbc:postgresql://db:5432/brokerx_db
+      end note
+    }
+
+    node "Conteneur PostgreSQL" as DB {
+      database "PostgreSQL 15" as PostgresDB
+      note right
+        Ports exposés: 5432
+        User: brokerx
+        Password: secret
+      end note
+    }
+
+  }
+}
+
+' Relations
+Client --> BrockerX : HTTP/HTTPS (port 8080)
+BrockerX --> PostgresDB : JDBC (port 5432)
+
+@enduml

@@ -1,17 +1,49 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
     <title>Portefeuille de l'utilisateur</title>
+    <script>
+        function depositWallet(event) {
+            event.preventDefault(); // Empêche l'envoi classique du formulaire
+
+            const userId = document.getElementById('userId').value;
+            const amount = document.getElementById('amount').value;
+
+            // Générer un Idempotency-Key unique
+            const idempotencyKey = crypto.randomUUID();
+
+            fetch('/wallet/deposit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Idempotency-Key': idempotencyKey
+                },
+                body: new URLSearchParams({
+                    userId: userId,
+                    amount: amount
+                })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert('Dépot effectué !');
+                    location.reload(); // Recharge la page pour mettre à jour le solde
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du dépôt.');
+                });
+        }
+    </script>
 </head>
 <body>
-<h1>Portefeuille de <c:out value="${user.username}"/></h1>
+<h1>Portefeuille de <c:out value="${user.firstName} ${user.lastName}"/></h1>
 
 <c:choose>
     <c:when test="${wallet != null}">
         <p>Solde actuel : $<c:out value="${wallet.balance}"/></p>
-        <form action="/wallet/deposit" method="post">
-            <input type="hidden" name="userId" value="${user.id}" />
-            Montant à déposer : <input type="number" step="0.01" name="amount"/>
+        <form onsubmit="depositWallet(event);">
+            <input type="hidden" id="userId" value="${user.id}"/>
+            Montant à déposer : <input type="number" step="0.01" id="amount"/>
             <button type="submit">Déposer</button>
         </form>
     </c:when>

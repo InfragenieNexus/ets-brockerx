@@ -1,0 +1,45 @@
+@startuml
+' Orientation pour la lisibilité
+left to right direction
+
+package Controller {
+  [UserController]
+  [WalletController]
+}
+
+package Service {
+  [UserService]
+  [WalletService]
+}
+
+package Repository {
+  [UserRepository]
+  [WalletRepository]
+  [TransactionRepository]
+}
+
+package Entity {
+  [User]
+  [Wallet]
+  [Transaction]
+}
+
+package View {
+  [JSP]
+}
+
+[UserController] --> [UserService]
+[WalletController] --> [WalletService]
+
+[UserService] --> [UserRepository]
+[UserService] --> [WalletRepository]
+[WalletService] --> [WalletRepository]
+[WalletService] --> [TransactionRepository]
+
+[UserRepository] --> [User]
+[WalletRepository] --> [Wallet]
+[TransactionRepository] --> [Transaction]
+
+[UserController] --> [JSP] : Met a jour la vue
+[JSP] --> [UserController] : Demande
+@enduml

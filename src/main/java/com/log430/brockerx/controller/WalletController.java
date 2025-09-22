@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -18,8 +19,7 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @GetMapping("/wallet/view")
-    public String viewWallet(@RequestParam Long userId, Model model) {
+    @GetMapping("/wallet/view") public String viewWallet(@RequestParam Long userId, Model model) {
         // Appel du service pour récupérer l'utilisateur et son portefeuille
         User user = walletService.getUserById(userId);
         if (user == null) {
@@ -33,11 +33,13 @@ public class WalletController {
 
         return "wallet"; // JSP : WEB-INF/jsp/wallet.jsp
     }
-    @PostMapping("/wallet/deposit")
-    public String depositWallet(@RequestParam Long userId, @RequestParam Double amount, Model model) {
+
+    @PostMapping("/wallet/deposit") public String depositWallet(@RequestParam Long userId, @RequestParam Double amount,
+                                                                @RequestHeader(value = "Idempotency-Key") String idempotencyKey,
+                                                                Model model) {
         User user = walletService.getUserById(userId);
         Wallet wallet = walletService.getWalletByUser(user);
-        walletService.deposit(userId, amount);
+        walletService.deposit(userId, amount, idempotencyKey);
         model.addAttribute("user", user);
         model.addAttribute("wallet", wallet);
         return "wallet";

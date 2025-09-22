@@ -1,0 +1,16 @@
+@startuml
+title CU3 - Dépot simulé
+start
+  :Demander dépôt simulé;
+  :Valider limites & anti-fraude;
+  :Créer transaction Pending (avec idempotency-key);
+  :Appeler Service Paiement Simulé;
+  if (Settled?) then (oui)
+    :Créditer solde; journaliser append-only;
+    :Notifier client;
+  else (async/rejet)
+    :Laisser Pending / marquer Failed; notifier;
+  endif
+  stop
+
+@enduml

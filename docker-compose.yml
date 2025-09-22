@@ -5,18 +5,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-        - db
+      - db
     environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/brokerx_db
-        SPRING_DATASOURCE_USERNAME: brokerx
-        SPRING_DATASOURCE_PASSWORD: secret
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
 
   db:
     image: postgres:15
     container_name: brockerx-db
     environment:
-      POSTGRES_USER: brokerx
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: brokerx_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"

@@ -1,0 +1,22 @@
+@startuml
+title CU1 - Inscription
+start
+repeat
+  :Saisir données KYC;
+  :Valider format;
+repeatwhile (Doublon?)
+:Créer compte Pending;
+    :Envoyer OTP;
+    :Attendre confirmation;
+
+    if (OTP valide?) then (oui)
+      :Activer compte;
+    stop
+
+    else (non)
+      :Expirer inscription;
+      stop
+
+@enduml
+
+

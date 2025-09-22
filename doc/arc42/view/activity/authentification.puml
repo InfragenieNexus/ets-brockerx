@@ -1,0 +1,22 @@
+@startuml
+title CU2 - Authentification
+start
+  :Saisir identifiants;
+  :Vérifier anti-brute/IP reputation;
+  if (MFA requis?) then (oui)
+    :Demander OTP/TOTP/WebAuthn;
+    if (OTP valide?) then (oui)
+      :Émettre session (JWT/opaque);
+      :Journaliser connexion;
+    else (non)
+      :Compter tentatives; lock si >3;
+      stop
+    endif
+  else (non)
+    :Émettre session;
+    :Journaliser connexion;
+  endif
+  stop
+
+ @enduml
+

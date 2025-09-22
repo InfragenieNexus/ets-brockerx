@@ -1,32 +1,51 @@
-name: CI
+name: CI/CD BrokerX
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: self-hosted
+
     steps:
       # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
-      # 2️⃣ Déploiement Docker
-      - name: Déploiement local
+      # 2️⃣ Génération du .env à partir des secrets
+      - name: Générer .env pour Docker
         run: |
-          cd $GITHUB_WORKSPACE
+          echo "DB_USER=${{ secrets.DB_USER }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${{ secrets.DB_NAME }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
+      # 3️⃣ Déploiement Docker
+      - name: Déployer Docker Compose
+        run: |
           docker compose down || true
           docker compose up -d --build
 
-          # 👇 attendre que la DB soit prête
-          echo "Waiting for DB..."
-          until docker exec brockerx-db pg_isready -U brokerx; do
+      # 4️⃣ Attendre que PostgreSQL soit prêt
+      - name: Attendre DB
+        run: |
+          retries=0
+          until docker exec brockerx-db pg_isready -U ${{ secrets.DB_USER }} || [ $retries -ge 12 ]; do
+            echo "DB pas encore prête..."
             sleep 5
-            echo "DB not ready yet..."
+            retries=$((retries+1))
           done
+          if [ $retries -ge 12 ]; then
+            echo "DB n'a pas démarré"
+            exit 1
+          fi
 
-      - name: Test déploiement
-        run: curl http://localhost:8080 || echo "App pas encore prête"
+      # 5️⃣ Vérifier l'application
+      - name: Vérifier l'application
+        run: |
+          curl -f http://localhost:8080/health || exit 1

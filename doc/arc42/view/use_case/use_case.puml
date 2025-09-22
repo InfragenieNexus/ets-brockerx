@@ -1,0 +1,15 @@
+@startuml
+left to right direction
+
+actor Client
+
+rectangle "BrokerX Platform (Phase 1)" {
+  usecase "Inscription / KYC" as UC1
+  usecase "Authentification / MFA" as UC2
+  usecase "Approvisionnement\nPortefeuille virtuel" as UC3
+}
+
+Client --> UC1
+Client --> UC2
+Client --> UC3
+@enduml

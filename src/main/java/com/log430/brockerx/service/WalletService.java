@@ -9,6 +9,8 @@ import com.log430.brockerx.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class WalletService {
     private final UserRepository userRepository;
@@ -22,8 +24,13 @@ public class WalletService {
         this.transactionRepository = transactionRepository;
     }
 
-    @Transactional
-    public Transaction deposit(Long userId, Double amount) {
+    @Transactional public Transaction deposit(Long userId, Double amount, String idempotencyKey) {
+
+        Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(idempotencyKey);
+        if (existingTx.isPresent()) {
+            return existingTx.get(); // on renvoie la transaction déjà existante
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         Wallet wallet = walletRepository.findByUserId(userId);
         if (wallet == null) {
@@ -37,6 +44,7 @@ public class WalletService {
         tx.setUser(user);
         tx.setAmount(amount);
         tx.setStatus("Pending");
+        tx.setIdempotencyKey(idempotencyKey);
         transactionRepository.save(tx);
 
         // Simuler le règlement immédiat
@@ -47,12 +55,14 @@ public class WalletService {
 
         return tx;
     }
+
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
     public Wallet getWalletByUser(User user) {
-        if (user == null) return null;
+        if (user == null)
+            return null;
         return walletRepository.findByUserId(user.getId());
     }
 }
