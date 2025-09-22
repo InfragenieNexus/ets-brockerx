@@ -73,7 +73,8 @@ penché vers une approche orientée événements
 
 ### Contexte métier
 
-![Activity](activity.png)
+![Activity](
+activity.png)
 
 Le système permet aux utilisateurs de :
 
@@ -89,10 +90,18 @@ Le système permet aux utilisateurs de :
 
 ### Contexte technique
 
-- **Application** : `calculator.py` - Script Python simple
-- **Tests** : `test_calculator.py` - Tests automatisés avec pytest
-- **Conteneurisation** : Docker Compose pour l'environnement de développement
-- **CI/CD** : Pipeline GitLab pour tests et déploiement automatique
+| Composant                   | Technologie / Détail                                                                     |
+|-----------------------------|------------------------------------------------------------------------------------------|
+| **Application**             | Spring Boot (Java 17+) avec JSP pour le front web                                        |
+| **Base de données**         | PostgreSQL 15, accès via JPA/Hibernate                                                   |
+| **Sécurité**                | Authentification email/mot de passe, OTP pour vérification, MFA TOTP optionnel           |
+| **Conteneurisation**        | Docker + Docker Compose sur VM Ubuntu Linux self-hosted                                  |
+| **CI/CD**                   | GitHub Actions pour build, tests et déploiement                                          |
+| **Gestion des dépendances** | Maven (pom.xml) pour librairies Java (Spring Security, JJWT, Google Authenticator, etc.) |
+| **Monitoring / Logs**       | Spring Boot Actuator (health, métriques)                                                 |
+| **Front-end**               | JSP + JSTL avec layout global pour header/footer                                         |
+| **Sessions / État**         | Session HTTP pour gérer l’utilisateur connecté et MFA                                    |
+| **Environnement**           | VM Ubuntu Linux, ports exposés 8080 (app) et 5432 (DB)                                   |
 
 ## 4. Stratégie de solution
 

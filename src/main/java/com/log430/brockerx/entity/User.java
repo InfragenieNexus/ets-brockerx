@@ -33,7 +33,18 @@ public class User {
     private String totpSecret; // pour MFA
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private String kycDocumentHash; // empreinte des documents fournis
+    private String kycDocumentHash;
+
+    private boolean mfaEnabled = false;
+
+    // getter/setter
+    public boolean isMfaEnabled() {
+        return mfaEnabled;
+    }
+
+    public void setMfaEnabled(boolean mfaEnabled) {
+        this.mfaEnabled = mfaEnabled;
+    }
 
     public String getFirstName() {
         return firstName;

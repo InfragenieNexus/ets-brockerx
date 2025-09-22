@@ -1,11 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Inscription BrokerX</title>
-</head>
-<body>
 <h1>Inscription</h1>
 
 <c:if test="${not empty error}">
@@ -24,5 +18,3 @@
 </form>
 
 <p>Déjà inscrit ? <a href="/login">Se connecter</a></p>
-</body>
-</html>

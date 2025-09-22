@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -15,10 +16,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final OTPService otpService;
 
-    public UserService(UserRepository userRepository, WalletRepository walletRepository) {
+    public UserService(UserRepository userRepository, WalletRepository walletRepository, OTPService otpService) {
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
+        this.otpService = otpService;
     }
 
     public User save(User user) {
@@ -37,6 +40,7 @@ public class UserService {
         return savedUser;
     }
 
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
@@ -44,4 +48,43 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    @Transactional
+    public User signup(String email, String password, String phone, String firstName, String lastName, String address,
+                       String dateOfBirth) {
+
+        if (userRepository.findByEmail(email) != null) {
+            throw new IllegalArgumentException("Email déjà utilisé");
+        }
+
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setPhone(phone);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setAddress(address);
+        user.setDateOfBirth(LocalDate.parse(dateOfBirth));
+        user.setStatus(User.Status.PENDING);
+
+        return this.createUser(user);
+    }
+
+    @Transactional public void activateUserWithOtp(User user, String otpCode) {
+        if (!otpService.verifyCode(user, otpCode)) {
+            throw new IllegalArgumentException("Code invalide");
+        }
+
+        user.setStatus(User.Status.ACTIVE);
+        userRepository.save(user);
+    }
+    
+    public User login(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email);
+        if (user == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Email ou mot de passe incorrect");
+        }
+        return user;
+    }
+
 }

@@ -1,11 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page session="true" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Bienvenue sur BrokerX</title>
-</head>
-<body>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <h1>Bienvenue sur BrokerX !</h1>
 
 <c:choose>
@@ -23,5 +17,3 @@
     </c:otherwise>
 </c:choose>
 
-</body>
-</html>

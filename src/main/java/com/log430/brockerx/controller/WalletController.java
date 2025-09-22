@@ -19,29 +19,36 @@ public class WalletController {
         this.walletService = walletService;
     }
 
+    // ======= VIEW WALLET =======
     @GetMapping("/wallet/view") public String viewWallet(@RequestParam Long userId, Model model) {
-        // Appel du service pour récupérer l'utilisateur et son portefeuille
         User user = walletService.getUserById(userId);
         if (user == null) {
             model.addAttribute("error", "Utilisateur non trouvé");
-            return "wallet"; // jsp wallet.jsp affichera l'erreur
+            model.addAttribute("contentPage", "wallet.jsp");
+            return "layout";
         }
 
         Wallet wallet = walletService.getWalletByUser(user);
         model.addAttribute("user", user);
         model.addAttribute("wallet", wallet);
 
-        return "wallet"; // JSP : WEB-INF/jsp/wallet.jsp
+        model.addAttribute("contentPage", "wallet.jsp");
+        return "layout";
     }
 
+    // ======= DEPOSIT =======
     @PostMapping("/wallet/deposit") public String depositWallet(@RequestParam Long userId, @RequestParam Double amount,
                                                                 @RequestHeader(value = "Idempotency-Key") String idempotencyKey,
                                                                 Model model) {
         User user = walletService.getUserById(userId);
         Wallet wallet = walletService.getWalletByUser(user);
+
         walletService.deposit(userId, amount, idempotencyKey);
+
         model.addAttribute("user", user);
         model.addAttribute("wallet", wallet);
-        return "wallet";
+
+        model.addAttribute("contentPage", "wallet.jsp");
+        return "layout";
     }
 }

@@ -1,11 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Configurer TOTP</title>
-</head>
-<body>
 <h1>Configurer votre authentification à deux facteurs</h1>
 
 <p>Scannez ce QR code avec Google Authenticator :</p>
@@ -19,5 +13,4 @@
 <c:if test="${not empty error}">
     <p style="color:red;"><c:out value="${error}"/></p>
 </c:if>
-</body>
-</html>
+
