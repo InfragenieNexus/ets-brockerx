@@ -3,6 +3,12 @@
 <head>
     <title>Portefeuille de l'utilisateur</title>
     <script>
+        function uuidv4() {
+            return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+                (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+            );
+        }
+
         function depositWallet(event) {
             event.preventDefault(); // Empêche l'envoi classique du formulaire
 
@@ -10,7 +16,7 @@
             const amount = document.getElementById('amount').value;
 
             // Générer un Idempotency-Key unique
-            const idempotencyKey = crypto.randomUUID();
+            const idempotencyKey = uuidv4();
 
             fetch('/wallet/deposit', {
                 method: 'POST',
