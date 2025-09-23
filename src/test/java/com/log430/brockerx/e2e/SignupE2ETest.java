@@ -6,20 +6,25 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import java.time.Duration;
 
 public class SignupE2ETest {
 
-    @Test public void signupFlowTest() {
+    @Test public void signupFlowTest() throws MalformedURLException {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        WebDriver driver = new ChromeDriver(options);
+        URL seleniumUrl = new URL("http://selenium-chrome:4444/wd/hub");
+        WebDriver driver = new RemoteWebDriver(seleniumUrl, options);
 
         try {
-            driver.get("http://localhost:8081/signup");
+            driver.get("http://brockerx-test:8080/signup");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("form")));
