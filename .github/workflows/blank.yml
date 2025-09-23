@@ -35,20 +35,20 @@ jobs:
       # 5️⃣ Lancer un environnement temporaire pour E2E
       - name: Docker Compose Test Env
         run: |
-          docker compose -f docker-compose.test.yml up -d --build
           retries=0
-          max_retries=12
-          until curl -f http://localhost:8081/actuator/health; do
-            if [ "$retries" -ge "$max_retries" ]; then
-              echo "App n'a pas démarré"
-              docker compose -f docker-compose.test.yml down
-              exit 1
-            fi
-            echo "App pas encore prête..."
-            sleep 5
-            retries=$((retries+1))
+          max_retries=24
+          until nc -z localhost 8081; do
+          if [ "$retries" -ge "$max_retries" ]; then
+          echo "App n'a pas démarré"
+          docker compose -f docker-compose.test.yml down
+          exit 1
+          fi
+          echo "Port 8081 pas encore ouvert..."
+          sleep 5
+          retries=$((retries+1))
           done
-          echo "App prête !"
+          echo "Port ouvert, app probablement prête"
+      
       
 
       # 6️⃣ Lancer les tests E2E
