@@ -28,6 +28,10 @@ jobs:
       - name: Build Maven
         run: mvn clean package -DskipTests
 
+      - name: Run Checkstyle
+        run: mvn checkstyle:check
+
+
       # 4️⃣ Tests unitaires et d'intégration
       - name: Run Unit & Integration Tests
         run: mvn verify -Dspring.profiles.active=test -Dtest="!*E2ETest"
