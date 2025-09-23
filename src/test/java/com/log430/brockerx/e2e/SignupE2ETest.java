@@ -7,12 +7,14 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.time.Duration;
 
+@ActiveProfiles("e2e")
 public class SignupE2ETest {
 
     @Test public void signupFlowTest() throws MalformedURLException {
@@ -20,7 +22,7 @@ public class SignupE2ETest {
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        URL seleniumUrl = new URL("http://localhost:4444/wd/hub");
+        URL seleniumUrl = new URL("http://selenium:4444/wd/hub");
         WebDriver driver = new RemoteWebDriver(seleniumUrl, options);
 
         try {

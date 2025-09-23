@@ -58,7 +58,7 @@ jobs:
 
       # 6️⃣ Lancer les tests E2E
       - name: Run E2E Tests
-        run: mvn test -Pe2e -Dspring.profiles.active=test
+        run: mvn test -Pe2e -Dspring.profiles.active=e2e
 
       # 7️⃣ Nettoyer l'environnement temporaire
       - name: Teardown Test Env
