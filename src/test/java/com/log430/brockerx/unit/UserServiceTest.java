@@ -19,6 +19,7 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private WalletRepository walletRepository;
 
@@ -26,15 +27,25 @@ class UserServiceTest {
     private UserService userService;
 
     @Test void signupCreatesUserAndWallet() {
-        User user = new User();
-        user.setEmail("test@example.com");
+        // Création d'un User simulé
+        User mockUser = new User();
+        mockUser.setEmail("test@example.com");
 
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        // Quand userRepository.save est appelé, retourne mockUser
+        when(userRepository.save(any(User.class))).thenReturn(mockUser);
 
+        // Appel de la méthode à tester
         User result = userService.signup("test@example.com", "password", "123456", "John", "Doe", "Addr", "2000-01-01");
 
+        // Vérifie que le résultat n'est pas nul
         assertNotNull(result);
+
+        // Vérifie que le wallet a été sauvegardé
         verify(walletRepository, times(1)).save(any(Wallet.class));
+
+        // Vérifie que le user a été sauvegardé
+        verify(userRepository, times(1)).save(any(User.class));
     }
 }
+
 
