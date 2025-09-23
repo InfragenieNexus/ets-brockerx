@@ -17,11 +17,11 @@ public class SignupE2ETest {
 
     @Test public void signupFlowTest() throws MalformedURLException {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        URL seleniumUrl = new URL("http://localhost:4444/wd/hub");
-        WebDriver driver = new RemoteWebDriver(seleniumUrl, options);
+        WebDriver driver = new ChromeDriver(options);
+
 
         try {
             driver.get("http://brockerx-test:8081/signup");
