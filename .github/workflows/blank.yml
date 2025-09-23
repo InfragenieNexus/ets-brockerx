@@ -38,25 +38,6 @@ jobs:
           docker compose -f docker-compose.test.yml ps
           docker compose -f docker-compose.test.yml logs --tail=50
 
-            # 5️⃣ Installer Chrome & ChromeDriver pour Selenium
-      - name: Install Chrome & ChromeDriver
-        run: |
-          sudo apt update
-          sudo apt install -y wget unzip xvfb
-          
-          # Installer Google Chrome
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt -f install -y
-          
-          # Récupérer version de Chrome
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          # Télécharger ChromeDriver correspondant
-          wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/
-
-
       # 5️⃣ Lancer un environnement temporaire pour E2E
       - name: Docker Compose Test Env
         run: |
