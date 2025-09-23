@@ -8,14 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  ci:
     runs-on: self-hosted
-
     steps:
       # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
-      # 2️⃣ Génération du .env à partir des secrets
+      # 2️⃣ Génération du .env pour Docker
       - name: Générer .env pour Docker
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}" > .env
@@ -25,27 +24,41 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
-      # 3️⃣ Déploiement Docker
-      - name: Déployer Docker Compose
-        run: |
-          docker compose down || true
-          docker compose up -d --build
+      # 3️⃣ Build Maven (sans tests pour l'instant)
+      - name: Build Maven
+        run: mvn clean package -DskipTests
 
-      # 4️⃣ Attendre que PostgreSQL soit prêt
-      - name: Attendre DB
+      # 4️⃣ Tests unitaires et d'intégration
+      - name: Run Unit & Integration Tests
+        run: mvn verify
+
+      # 5️⃣ Lancer un environnement temporaire pour E2E
+      - name: Docker Compose Test Env
         run: |
+          docker compose -f docker-compose.test.yml up -d --build
+          # Attendre que l'app soit prête
           retries=0
-          until docker exec brockerx-db pg_isready -U ${{ secrets.DB_USER }} || [ $retries -ge 12 ]; do
-            echo "DB pas encore prête..."
+          until curl -f http://localhost:8080/actuator/health || [ $retries -ge 12 ]; do
+            echo "App pas encore prête..."
             sleep 5
             retries=$((retries+1))
           done
           if [ $retries -ge 12 ]; then
-            echo "DB n'a pas démarré"
+            echo "App n'a pas démarré"
+            docker compose -f docker-compose.test.yml down
             exit 1
           fi
 
-      # 5️⃣ Vérifier l'application
-      - name: Vérifier l'application
+      # 6️⃣ Lancer les tests E2E
+      - name: Run E2E Tests
+        run: mvn test -Dtest=**/*E2ETest
+
+      # 7️⃣ Nettoyer l'environnement temporaire
+      - name: Teardown Test Env
+        run: docker compose -f docker-compose.test.yml down
+
+      # 8️⃣ Si tout passe, on peut déployer prod (optionnel)
+      - name: Deploy Production
         run: |
-          curl -f http://localhost:8080/actuator/health || exit 1
+          docker compose down || true
+          docker compose up -d --build
