@@ -35,17 +35,6 @@ public class UserControllerSignupTest {
     @Autowired
     private UserService userService;
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean public OTPService otpService() {
-            return Mockito.mock(OTPService.class);
-        }
-
-        @Bean public UserService userService() {
-            return Mockito.mock(UserService.class);
-        }
-    }
-
     @Test void testSignupSuccess() throws Exception {
         User mockUser = new User();
         mockUser.setId(1L);
