@@ -38,7 +38,8 @@ jobs:
           docker compose -f docker-compose.test.yml up -d --build
           # Attendre que l'app soit prête
           retries=0
-          until curl -f http://localhost:8080/actuator/health || [ $retries -ge 12 ]; do
+          until curl -f http://localhost:8081/actuator/health || [ $retries 
+          -ge 12 ]; do
             echo "App pas encore prête..."
             sleep 5
             retries=$((retries+1))
