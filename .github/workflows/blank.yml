@@ -30,7 +30,8 @@ jobs:
 
       # 4️⃣ Tests unitaires et d'intégration
       - name: Run Unit & Integration Tests
-        run: mvn verify -Dspring.profiles.active=test
+        run: mvn verify -Dspring.profiles.active=test -Dtest="!*E2ETest"
+
 
       - name: Debug Docker Compose
         run: |
@@ -56,9 +57,10 @@ jobs:
           echo "Port ouvert, app probablement prête"
 
 
-      # 6️⃣ Lancer les tests E2E
+        # 6️⃣ Lancer les tests E2E
       - name: Run E2E Tests
-        run: mvn test -Pe2e -Dspring.profiles.active=e2e
+        run: mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest"
+
 
       # 7️⃣ Nettoyer l'environnement temporaire
       - name: Teardown Test Env
