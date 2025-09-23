@@ -23,8 +23,8 @@ public class SignupE2ETest {
             chrome.start();
 
             WebDriver driver = chrome.getWebDriver();
-            
-            String signupUrl = "http://host.docker.internal:8081/signup";
+
+            String signupUrl = "http://172.17.0.1:8081/signup";
             driver.get(signupUrl);
 
             // Attente pour que le formulaire soit visible
