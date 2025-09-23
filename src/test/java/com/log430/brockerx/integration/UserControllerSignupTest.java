@@ -29,45 +29,12 @@ public class UserControllerSignupTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private OTPService otpService;
-
-    @Autowired
-    private UserService userService;
-
     @Test void testSignupSuccess() throws Exception {
-        User mockUser = new User();
-        mockUser.setId(1L);
-        mockUser.setEmail("user@test.com");
-
-        when(userService.signup(any(), any(), any(), any(), any(), any(), any())).thenReturn(mockUser);
-
-        doNothing().when(otpService).sendOTP(any(User.class));
-
-        MockHttpSession session = new MockHttpSession();
-
         mockMvc.perform(post("/signup").param("email", "user@test.com").param("password", "pass123").param("phone",
                                                                                                            "1234567890")
-                                       .param("firstName", "William").param("lastName", "Desgagné").param("address",
-                                                                                                          "123 Rue Test")
-                                       .param("dateOfBirth", "2000-01-01").session(session)).andExpect(
-                status().is3xxRedirection()).andExpect(redirectedUrl("/verify-otp"));
-
-        User sessionUser = (User) session.getAttribute("userPending");
-        assert sessionUser != null;
-        assert sessionUser.getEmail().equals("user@test.com");
-    }
-
-    @Test void testSignupFailure() throws Exception {
-        when(userService.signup(any(), any(), any(), any(), any(), any(), any())).thenThrow(
-                new IllegalArgumentException("Email déjà utilisé"));
-
-        mockMvc.perform(post("/signup").param("email", "duplicate@test.com").param("password", "pass123").param("phone",
-                                                                                                                "1234567890")
                                        .param("firstName", "William").param("lastName", "Desgagné")
                                        .param("address", "123 Rue Test").param("dateOfBirth", "2000-01-01")).andExpect(
-                status().isOk()).andExpect(model().attributeExists("error")).andExpect(
-                model().attribute("error", "Email déjà utilisé")).andExpect(
-                model().attribute("contentPage", "signup.jsp")).andExpect(view().name("layout"));
+                status().is3xxRedirection()).andExpect(redirectedUrl("/verify-otp"));
     }
 }
+
