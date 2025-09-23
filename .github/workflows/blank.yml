@@ -30,7 +30,7 @@ jobs:
 
       # 4️⃣ Tests unitaires et d'intégration
       - name: Run Unit & Integration Tests
-        run: mvn verify
+        run: mvn verify -Ptest
 
       # 5️⃣ Lancer un environnement temporaire pour E2E
       - name: Docker Compose Test Env
