@@ -22,7 +22,7 @@ public class SignupE2ETest {
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        URL seleniumUrl = new URL("http://selenium:4444/wd/hub");
+        URL seleniumUrl = new URL("http://localhost:4444/wd/hub");
         WebDriver driver = new RemoteWebDriver(seleniumUrl, options);
 
         try {
