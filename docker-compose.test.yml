@@ -1,13 +1,22 @@
 version: "3.9"
+
 services:
   brockerx-test:
     build: .
     ports:
-      - "8081:8080"
+      - "8081:8080"  # mappe le port 8080 du container vers 8081 pour les tests E2E
     environment:
-      SPRING_PROFILES_ACTIVE: test   # <-- force le profil test
+      SPRING_PROFILES_ACTIVE: e2e
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-test:5432/test_db
+      SPRING_DATASOURCE_USERNAME: test_user
+      SPRING_DATASOURCE_PASSWORD: test_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_ADDRESS: 0.0.0.0
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
     depends_on:
       - db-test
+    restart: on-failure
 
   db-test:
     image: postgres:15
@@ -16,4 +25,9 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
-      - "5433:5432"  # évite conflit avec le db prod locale
+      - "5433:5432"  # évite conflit avec ta DB prod locale
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U test_user -d test_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

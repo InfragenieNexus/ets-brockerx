@@ -20,7 +20,7 @@ public class SignupE2ETest {
         WebDriver driver = new ChromeDriver(options);
 
         try {
-            driver.get("http://localhost:8080/signup");
+            driver.get("http://localhost:8081/signup");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
