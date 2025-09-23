@@ -59,7 +59,8 @@ jobs:
 
         # 6️⃣ Lancer les tests E2E
       - name: Run E2E Tests
-        run: mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest"
+        run: mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest" -Dapp.url=http://brockerx-test:8080
+
 
 
       # 7️⃣ Nettoyer l'environnement temporaire
