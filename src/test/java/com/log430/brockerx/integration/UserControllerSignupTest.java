@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,21 +23,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class UserControllerSignupTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private OTPService otpService; // Injecté par TestConfiguration
+    private OTPService otpService;
 
     @Autowired
-    private UserService userService; // Injecté par TestConfiguration
+    private UserService userService;
 
-    // Configuration pour injecter les mocks au contexte Spring
     @TestConfiguration
     static class TestConfig {
-
         @Bean public OTPService otpService() {
             return Mockito.mock(OTPService.class);
         }
@@ -51,11 +51,8 @@ public class UserControllerSignupTest {
         mockUser.setId(1L);
         mockUser.setEmail("user@test.com");
 
-        // Mock la méthode signup
-        when(userService.signup(any(String.class), any(String.class), any(String.class), any(String.class),
-                                any(String.class), any(String.class), any(String.class))).thenReturn(mockUser);
+        when(userService.signup(any(), any(), any(), any(), any(), any(), any())).thenReturn(mockUser);
 
-        // Mock l'envoi OTP pour qu'il ne fasse rien
         doNothing().when(otpService).sendOTP(any(User.class));
 
         MockHttpSession session = new MockHttpSession();
@@ -67,16 +64,13 @@ public class UserControllerSignupTest {
                                        .param("dateOfBirth", "2000-01-01").session(session)).andExpect(
                 status().is3xxRedirection()).andExpect(redirectedUrl("/verify-otp"));
 
-        // Vérifie que la session contient bien userPending
         User sessionUser = (User) session.getAttribute("userPending");
         assert sessionUser != null;
         assert sessionUser.getEmail().equals("user@test.com");
     }
 
     @Test void testSignupFailure() throws Exception {
-        // Mock une exception pour simuler une erreur
-        when(userService.signup(any(String.class), any(String.class), any(String.class), any(String.class),
-                                any(String.class), any(String.class), any(String.class))).thenThrow(
+        when(userService.signup(any(), any(), any(), any(), any(), any(), any())).thenThrow(
                 new IllegalArgumentException("Email déjà utilisé"));
 
         mockMvc.perform(post("/signup").param("email", "duplicate@test.com").param("password", "pass123").param("phone",
