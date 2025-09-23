@@ -55,14 +55,6 @@ jobs:
           done
           echo "Port ouvert, app probablement prête"
 
-      - name: Wait for App & Selenium
-        run: |
-          for i in {1..24}; do
-            nc -z localhost 8081 && nc -z localhost 4444 && break
-            echo "App ou Selenium pas encore prêt..."
-            sleep 5
-          done
-
 
       # 6️⃣ Lancer les tests E2E
       - name: Run E2E Tests
