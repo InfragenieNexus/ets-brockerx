@@ -27,7 +27,7 @@ public class SignupE2ETest {
             // ⚠️ Modifier l'URL selon ton setup :
             // - Si l'app tourne dans Docker Compose : "http://<nom_service_app>:8080/signup"
             // - Si l'app tourne sur l'hôte (GitHub runner) : "http://host.docker.internal:8081/signup"
-            String signupUrl = "http://dockerx-test:8081/signup";
+            String signupUrl = "http://host.docker.internal:8081/signup";
             driver.get(signupUrl);
 
             // Attente pour que le formulaire soit visible
