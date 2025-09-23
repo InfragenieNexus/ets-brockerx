@@ -20,11 +20,11 @@ public class SignupE2ETest {
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        URL seleniumUrl = new URL("http://selenium-chrome:4444/wd/hub");
+        URL seleniumUrl = new URL("http://selenium:4444/wd/hub");
         WebDriver driver = new RemoteWebDriver(seleniumUrl, options);
 
         try {
-            driver.get("http://brockerx-test:8080/signup");
+            driver.get("http://brockerx-test:8081/signup");
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("form")));
