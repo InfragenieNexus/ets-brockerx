@@ -11,10 +11,8 @@ jobs:
   ci:
     runs-on: self-hosted
     steps:
-      # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
-      # 2️⃣ Génération du .env pour Docker
       - name: Générer .env pour Docker
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}" > .env
@@ -24,7 +22,6 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
-      # 3️⃣ Build Maven (sans tests pour l'instant)
       - name: Build Maven
         run: mvn clean package -DskipTests
 
@@ -32,7 +29,6 @@ jobs:
         run: mvn checkstyle:check
 
 
-      # 4️⃣ Tests unitaires et d'intégration
       - name: Run Unit & Integration Tests
         run: mvn verify -Dspring.profiles.active=test -Dtest="!*E2ETest"
 
@@ -43,7 +39,6 @@ jobs:
           docker compose -f docker-compose.test.yml ps
           docker compose -f docker-compose.test.yml logs --tail=50
 
-      # 5️⃣ Lancer un environnement temporaire pour E2E
       - name: Docker Compose Test Env
         run: |
           retries=0
@@ -61,17 +56,16 @@ jobs:
           echo "Port ouvert, app probablement prête"
 
 
-        # 6️⃣ Lancer les tests E2E
       - name: Run E2E Tests
         run: mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest"
 
+      - name: Test coverage
+        run: mvn jacoco:report
 
 
-      # 7️⃣ Nettoyer l'environnement temporaire
       - name: Teardown Test Env
         run: docker compose -f docker-compose.test.yml down
 
-      # 8️⃣ Si tout passe, on peut déployer prod (optionnel)
       - name: Deploy Production
         run: |
           docker compose down || true
