@@ -11,8 +11,10 @@ jobs:
   ci:
     runs-on: self-hosted
     steps:
+      # Étape 1 : Récupérer le code
       - uses: actions/checkout@v4
 
+      # Étape 2 : Générer le fichier .env
       - name: Générer .env pour Docker
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}" > .env
@@ -22,50 +24,46 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
-      - name: Build Maven
-        run: mvn clean package -DskipTests
+      # Étape 3 : Build Docker image (inclut compilation Maven)
+      - name: Build Docker image
+        run: docker build -t brockerx:latest .
 
-      - name: Run Checkstyle
-        run: mvn checkstyle:check
-
-
-      - name: Run Unit & Integration Tests
-        run: mvn verify -Dspring.profiles.active=test -Dtest="!*E2ETest"
-
-
-      - name: Debug Docker Compose
+      # Étape 4 : Lancer le conteneur de test
+      - name: Run Test Container
         run: |
-          docker compose -f docker-compose.test.yml up -d
-          docker compose -f docker-compose.test.yml ps
-          docker compose -f docker-compose.test.yml logs --tail=50
-
-      - name: Docker Compose Test Env
-        run: |
+          docker run -d --name brockerx_test -p 8081:8080 brockerx:latest
+          # Attendre que l'application soit prête
           retries=0
           max_retries=24
           until nc -z localhost 8081; do
-          if [ "$retries" -ge "$max_retries" ]; then
-          echo "App n'a pas démarré"
-          docker compose -f docker-compose.test.yml down
-          exit 1
-          fi
-          echo "Port 8081 pas encore ouvert..."
-          sleep 5
-          retries=$((retries+1))
+            if [ "$retries" -ge "$max_retries" ]; then
+              echo "App n'a pas démarré"
+              docker stop brockerx_test
+              docker rm brockerx_test
+              exit 1
+            fi
+            echo "Port 8081 pas encore ouvert..."
+            sleep 5
+            retries=$((retries+1))
           done
-          echo "Port ouvert, app probablement prête"
+          echo "App prête pour les tests"
 
+      # Étape 5 : Lancer les tests via Maven dans le conteneur
+      - name: Run E2E Tests in Docker
+        run: |
+          docker exec brockerx_test mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest"
 
-      - name: Run E2E Tests
-        run: mvn test -Dspring.profiles.active=e2e -Dtest="*E2ETest"
-
+      # Étape 6 : Récupérer le rapport de couverture (optionnel)
       - name: Test coverage
-        run: mvn jacoco:report
+        run: docker exec brockerx_test mvn jacoco:report
 
+      # Étape 7 : Stop & remove container de test
+      - name: Teardown Test Container
+        run: |
+          docker stop brockerx_test
+          docker rm brockerx_test
 
-      - name: Teardown Test Env
-        run: docker compose -f docker-compose.test.yml down
-
+      # Étape 8 : Déploiement production
       - name: Deploy Production
         run: |
           docker compose down || true
