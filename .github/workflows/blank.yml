@@ -75,3 +75,7 @@ jobs:
         run: |
           docker compose down || true
           docker compose up -d --build
+      - name: Check Health
+        run: |
+          curl -f http://localhost:8080/actuator/health || exit 1
+        
