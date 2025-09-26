@@ -22,7 +22,7 @@ public class WalletController {
 
     // ======= VIEW WALLET =======
     @GetMapping("/wallet/view") public String viewWallet(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user"); // récupère l'utilisateur connecté
+        User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/login"; // pas connecté → redirection
         }
