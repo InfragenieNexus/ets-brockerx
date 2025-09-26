@@ -3,6 +3,7 @@ package com.log430.brockerx.controller;
 import com.log430.brockerx.entity.User;
 import com.log430.brockerx.entity.Wallet;
 import com.log430.brockerx.service.WalletService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +21,10 @@ public class WalletController {
     }
 
     // ======= VIEW WALLET =======
-    @GetMapping("/wallet/view") public String viewWallet(@RequestParam Long userId, Model model) {
-        User user = walletService.getUserById(userId);
+    @GetMapping("/wallet/view") public String viewWallet(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user"); // récupère l'utilisateur connecté
         if (user == null) {
-            model.addAttribute("error", "Utilisateur non trouvé");
-            model.addAttribute("contentPage", "wallet.jsp");
-            return "layout";
+            return "redirect:/login"; // pas connecté → redirection
         }
 
         Wallet wallet = walletService.getWalletByUser(user);
@@ -35,6 +34,7 @@ public class WalletController {
         model.addAttribute("contentPage", "wallet.jsp");
         return "layout";
     }
+
 
     // ======= DEPOSIT =======
     @PostMapping("/wallet/deposit") public String depositWallet(@RequestParam Long userId, @RequestParam Double amount,

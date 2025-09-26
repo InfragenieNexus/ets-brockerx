@@ -66,6 +66,11 @@ jobs:
       - name: Teardown Test Env
         run: docker compose -f docker-compose.test.yml down
 
+  cd:
+    runs-on: self-hosted
+    needs: ci
+    steps:
+      - uses: actions/checkout@v4
       - name: Deploy Production
         run: |
           docker compose down || true

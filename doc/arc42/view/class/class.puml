@@ -1,0 +1,108 @@
+@startuml
+
+' =========================
+' VUE JSP
+' =========================
+class JSP {
+  +login.jsp
+  +signup.jsp
+  +wallet.jsp
+  +verify-otp.jsp
+}
+JSP --> UserController
+JSP --> WalletController
+
+' =========================
+' CONTROLLERS
+' =========================
+class UserController {
+  +showLoginForm(model)
+  +login(email, password, session, model)
+  +showSignupForm(model)
+  +signup(email, password, phone, firstName, lastName, address, dateOfBirth, session, model)
+  +showVerifyOtpForm(model)
+  +verifyOtp(otpCode, session, model)
+}
+
+class WalletController {
+  +viewWallet(userId, model)
+  +depositWallet(userId, amount, idempotencyKey, model)
+}
+
+' =========================
+' SERVICES
+' =========================
+class UserService {
+  +login(email, password)
+  +signup(email, password, phone, firstName, lastName, address, dateOfBirth)
+  +activateUserWithOtp(user, otpCode)
+  +findByEmail(email)
+}
+
+class WalletService {
+  +getUserById(userId)
+  +getWalletByUser(user)
+  +deposit(userId, amount, idempotencyKey)
+}
+
+class OTPService {
+  +sendOTP(user)
+  +verifyCode(user, code)
+  +generateOTP(user)
+}
+
+' =========================
+' REPOSITORIES
+' =========================
+class UserRepository
+class WalletRepository
+class TransactionRepository
+
+' =========================
+' ENTITIES
+' =========================
+class User {
+  -id
+  -email
+  -password
+  -status
+  -mfaEnabled
+  -totpSecret
+  +isMfaEnabled()
+}
+
+class Wallet {
+  -id
+  -user
+  -balance
+}
+
+class Transaction {
+  -id
+  -user
+  -amount
+  -status
+  -idempotencyKey
+  -createdAt
+}
+
+' =========================
+' RELATIONS
+' =========================
+UserController --> UserService
+UserController --> OTPService
+WalletController --> WalletService
+
+UserService --> UserRepository
+WalletService --> WalletRepository
+WalletService --> TransactionRepository
+OTPService --> UserRepository
+
+UserRepository --> User
+WalletRepository --> Wallet
+TransactionRepository --> Transaction
+
+User "1" -- "1" Wallet
+Transaction "*" -- "1" User
+
+@enduml

@@ -92,4 +92,11 @@ public class UserController {
             return "layout";
         }
     }
+
+    // ======= LOGOUT =======
+    @GetMapping("/logout") public String logout(HttpSession session) {
+        session.invalidate(); // supprime toutes les infos de session
+        return "redirect:/login"; // redirige vers la page de login
+    }
+
 }

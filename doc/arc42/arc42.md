@@ -49,11 +49,62 @@ penché vers une approche orientée événements
 |----------------------------|-----------------------------------------------------------------------------------------------------------|
 | **Environnement cible**    | L’application doit être déployée sur une machine virtuelle fournie par l’école/labo.                      |
 | **Conteneurisation**       | Tous les services doivent être packagés dans des conteneurs Docker pour assurer portabilité et isolation. |
-| **CI/CD automatisé**       | Le déploiement doit être automatisé via un pipeline GitLab CI/CD (build, tests, déploiement).             |
+| **CI/CD automatisé**       | Le déploiement doit être automatisé via un pipeline Github CI/CD (build, tests, déploiement).             |
 | **Tests automatisés**      | Des tests unitaires et d’intégration doivent être exécutés automatiquement dans le pipeline.              |
 | **Observabilité minimale** | Journaux applicatifs et monitoring basique doivent être activés dès la première version.                  |
 
-## 3. Portée et contexte du système
+## 3. Portée et contexte du système DDD
+
+Le projet suit les principes du Domain-Driven Design pour structurer le code
+autour des concepts métier.
+
+### Entités (Entities)
+
+- User : identifiée par son id, possède des attributs métier (email, password,
+  status, etc.) et est associée à un Wallet.
+
+- Wallet : identifiée par son id, possède un solde et référence les
+  transactions associées.
+
+- Transaction : identifiée par son id, référence un User, un montant, un
+  statut et une clé d’idempotence.
+
+### Agrégats (Aggregates)
+
+- UserAggregate : englobe l’entité User et son Wallet.
+
+- TransactionAggregate : gère les transactions liées à un portefeuille.
+
+- UserService : gère les opérations sur les utilisateurs (inscription, login,
+  activation via OTP).
+
+- WalletService : gère les opérations sur les portefeuilles (consultation du
+  solde, dépôt, retrait).
+
+- OTPService : gère la génération et la vérification des OTP pour la MFA.
+
+### Repositories
+
+- UserRepository : accès aux entités User.
+
+- WalletRepository : accès aux entités Wallet.
+
+- TransactionRepository : accès aux entités Transaction.
+
+### Ubiquitous Language
+
+Le langage métier utilisé dans le projet est défini en collaboration avec les
+experts métier et est partagé par l’ensemble de l’équipe de développement. Il
+sert à réduire les ambiguïtés et à uniformiser la communication entre métier et
+technique.
+
+| Terme           | Description                                                                                                                                   |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **User**        | Représente un client inscrit sur la plateforme, pouvant posséder un portefeuille et effectuer des transactions.                               |
+| **Wallet**      | Portefeuille associé à un utilisateur, contenant le solde disponible et l’historique des transactions.                                        |
+| **Transaction** | Opération financière réalisée par un utilisateur sur son portefeuille. Peut être en attente (Pending), validée (Settled) ou échouée (Failed). |
+| **OTP**         | One-Time Password, utilisé pour la vérification MFA lors de la connexion.                                                                     |
+| **Deposit**     | Actions permettant d’ajouter des fonds dans le portefeuille.                                                                                  |
 
 # Priorisation des Cas d’Utilisation (MoSCoW)
 
@@ -73,8 +124,9 @@ penché vers une approche orientée événements
 
 ### Contexte métier
 
-![Activity](
-activity.png)
+![img_4.png](img_4.png)
+![img_5.png](img_5.png)
+![img_6.png](img_6.png)
 
 Le système permet aux utilisateurs de :
 
@@ -115,15 +167,16 @@ Le système permet aux utilisateurs de :
 
 ## 5. Vue des blocs de construction
 
-![Class](class.png)
+![img_3.png](img_3.png)
+![img_7.png](img_7.png)
 
 ## 6. Vue d'exécution
 
-![Use Case](use_case.png)
+![img_2.png](img_2.png)
 
 ## 7. Vue de déploiement
 
-![Deployment](deployment.png)
+![img_1.png](img_1.png)
 
 ## 8. Concepts transversaux
 
@@ -261,8 +314,6 @@ d’utilisation (CU).
   les fonctionnalités centrales (CU5 et CU7).
 - **Phase 3** : prévoir une refactorisation légère si les modules ajoutés en
   phase 2 révèlent des incohérences dans l’architecture actuelle.
-
-## 12. Glossaire
 
 ## 12. Glossaire
 

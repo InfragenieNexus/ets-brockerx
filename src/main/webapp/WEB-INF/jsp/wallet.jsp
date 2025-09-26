@@ -30,7 +30,7 @@
             .then(response => response.text())
             .then(data => {
                 alert('Dépot effectué !');
-                location.reload(); // Recharge la page pour mettre à jour le solde
+                location.reload();
             })
             .catch(error => {
                 console.error('Erreur:', error);
