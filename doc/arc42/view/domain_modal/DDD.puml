@@ -1,0 +1,55 @@
+@startuml
+title Schema du Modèle du domaine - BrokerX
+
+' === Entités principales ===
+class User {
+  +UserId : UUID
+  +nom : String
+  +email : String
+  +statut : StatutCompte
+}
+
+class Wallet {
+  +solde : Decimal
+}
+
+
+class Order {
+  +ordreId : UUID
+  +type : TypeOrdre
+  +symbole : String
+  +sens : Buy/Sell
+  +quantite : int
+  +prix : Decimal
+  +statut : StatutOrdre
+  +timestamp : DateTime
+}
+
+
+class OrderBook {
+  +symbole : String
+}
+
+class MatchingEngine {
+}
+
+class AuditLog {
+  +eventId : UUID
+  +type : String
+  +timestamp : DateTime
+  +payload : String
+}
+
+' === Relations ===
+User "1" -- "*" Wallet
+
+Wallet  --  Order
+
+OrderBook "1" -> "*" Order : Contient
+MatchingEngine "1" -- "*" OrderBook
+MatchingEngine "1" -- "*" Order : add
+AuditLog ..> User : trace
+AuditLog ..> MatchingEngine : trace
+User "*" -- "*" Order : soumet
+
+@enduml

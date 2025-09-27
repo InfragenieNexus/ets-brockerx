@@ -1,4 +1,4 @@
-# Calculatrice - Documentation d'Architecture
+# BrokerX+ - Documentation d'Architecture
 
 Ce document, basé sur le modèle arc42, décrit une application de courtage pour
 la compagnie BrockerX dans le cadre du
@@ -8,7 +8,7 @@ LOG430.
 
 ### Panorama des exigences
 
-L'application « BrockerX » est une plateforme de courtage en ligne permettant
+L'application « BrokerX » est une plateforme de courtage en ligne permettant
 aux investisseurs de:
 
 - Créer et gérer un compte utilisateur
@@ -58,38 +58,73 @@ penché vers une approche orientée événements
 Le projet suit les principes du Domain-Driven Design pour structurer le code
 autour des concepts métier.
 
-### Entités (Entities)
+Sketch du modele du domaine
 
-- User : identifiée par son id, possède des attributs métier (email, password,
-  status, etc.) et est associée à un Wallet.
+![img_9.png](img_9.png)
 
-- Wallet : identifiée par son id, possède un solde et référence les
-  transactions associées.
+# Modèle DDD - BrokerX
 
-- Transaction : identifiée par son id, référence un User, un montant, un
-  statut et une clé d’idempotence.
+## Entités (Entities)
 
-### Agrégats (Aggregates)
+- **User**  
+  Identifiée par `userId`.  
+  Attributs : nom, email, statut.  
+  Associée à un **Wallet**.
 
-- UserAggregate : englobe l’entité User et son Wallet.
+- **Wallet**  
+  Identifiée par `walletId`.  
+  Contient un solde et les **Positions** détenues par l’utilisateur.
 
-- TransactionAggregate : gère les transactions liées à un portefeuille.
+- **Transaction**  
+  Identifiée par `transactionId`.  
+  Référence un User, un montant, un statut et une clé d’idempotence.  
+  Sert pour les dépôts/retraits.
 
-- UserService : gère les opérations sur les utilisateurs (inscription, login,
-  activation via OTP).
+- **Order**  
+  Identifiée par `orderId`.  
+  Représente un ordre d’achat/vente (type, symbole, quantité, prix, statut,
+  timestamp).
 
-- WalletService : gère les opérations sur les portefeuilles (consultation du
-  solde, dépôt, retrait).
+- **Execution**  
+  Identifiée par `executionId`.  
+  Représente une exécution totale ou partielle d’un ordre.
 
-- OTPService : gère la génération et la vérification des OTP pour la MFA.
+- **OrderBook**  
+  Carnet d’ordres pour un instrument (côté achat/vente, trié par priorité
+  prix/temps).
 
-### Repositories
+## Services de domaine
 
-- UserRepository : accès aux entités User.
+- **UserService**  
+  Gère les opérations utilisateurs (inscription, login, activation via OTP).
 
-- WalletRepository : accès aux entités Wallet.
+- **WalletService**  
+  Gère le portefeuille (consultation du solde, dépôt, retrait, mise à jour des
+  positions).
 
-- TransactionRepository : accès aux entités Transaction.
+- **TransactionService**  
+  Gère le cycle de vie des transactions (dépôt, retrait, validation).
+
+- **MatchingEngineService** (*Moteur d’appariement interne*)  
+  Reçoit les ordres, les insère dans l’`OrderBook`, cherche des contreparties et
+  génère des `Executions`.
+
+- **MarketDataService**  
+  Diffuse les mises à jour du carnet (`top-of-book`, exécutions, prix temps
+  réel).
+
+- **OTPService**  
+  Gère la génération et la vérification des OTP pour l’authentification
+  multi-facteurs.
+
+## Repositories
+
+- **UserRepository** : accès aux entités `User`.
+- **WalletRepository** : accès aux entités `Wallet` (et `Positions`).
+- **TransactionRepository** : accès aux entités `Transaction`.
+- **OrderRepository** : accès aux entités `Order`.
+- **ExecutionRepository** : accès aux entités `Execution`.
+- **OrderBookRepository** : accès aux carnets d’ordres par symbole.
 
 ### Ubiquitous Language
 
@@ -142,18 +177,18 @@ Le système permet aux utilisateurs de :
 
 ### Contexte technique
 
-| Composant                   | Technologie / Détail                                                                     |
-|-----------------------------|------------------------------------------------------------------------------------------|
-| **Application**             | Spring Boot (Java 17+) avec JSP pour le front web                                        |
-| **Base de données**         | PostgreSQL 15, accès via JPA/Hibernate                                                   |
-| **Sécurité**                | Authentification email/mot de passe, OTP pour vérification, MFA TOTP optionnel           |
-| **Conteneurisation**        | Docker + Docker Compose sur VM Ubuntu Linux self-hosted                                  |
-| **CI/CD**                   | GitHub Actions pour build, tests et déploiement                                          |
-| **Gestion des dépendances** | Maven (pom.xml) pour librairies Java (Spring Security, JJWT, Google Authenticator, etc.) |
-| **Monitoring / Logs**       | Spring Boot Actuator (health, métriques)                                                 |
-| **Front-end**               | JSP + JSTL avec layout global pour header/footer                                         |
-| **Sessions / État**         | Session HTTP pour gérer l’utilisateur connecté et MFA                                    |
-| **Environnement**           | VM Ubuntu Linux, ports exposés 8080 (app) et 5432 (DB)                                   |
+| Composant                   | Technologie / Détail                                                               |
+|-----------------------------|------------------------------------------------------------------------------------|
+| **Application**             | Spring Boot (Java 17+) avec JSP pour le front web                                  |
+| **Base de données**         | PostgreSQL 15, accès via JPA/Hibernate                                             |
+| **Sécurité**                | Authentification email/mot de passe, OTP pour vérification, MFA TOTP optionnel     |
+| **Conteneurisation**        | Docker + Docker Compose sur VM Ubuntu Linux self-hosted                            |
+| **CI/CD**                   | GitHub Actions pour build, tests et déploiement                                    |
+| **Gestion des dépendances** | Maven (pom.xml) pour librairies Java (Spring Security, Google Authenticator, etc.) |
+| **Monitoring / Logs**       | Spring Boot Actuator (health, métriques)                                           |
+| **Front-end**               | JSP + JSTL avec layout global pour header/footer                                   |
+| **Sessions / État**         | Session HTTP pour gérer l’utilisateur connecté et MFA                              |
+| **Environnement**           | VM Ubuntu Linux, ports exposés 8080 (app) et 5432 (DB)                             |
 
 ## 4. Stratégie de solution
 
@@ -192,8 +227,155 @@ Le système permet aux utilisateurs de :
 
 ## 9. Décisions d'architecture
 
-Veuillez consulter les fichiers `/docs/adr/adr001.md`, `/docs/adr/adr002.md`,
-`/docs/adr/adr003.md`.
+#### ADR 001 – Choix de l'architecture globale
+
+#### Statut
+
+Acceptée
+
+#### Contexte
+
+Contexte
+
+BrokerX+ doit permettre à des clients de passer des ordres, consulter leurs
+portefeuilles et recevoir des notifications
+d’exécution. Pour la phase 1, l’objectif est de démontrer la faisabilité avec un
+prototype de petite envergure (Proof of Concept).
+
+La majeure partie de la logique métier (règles pré-trade, validation des ordres,
+gestion de portefeuille) se trouve dans le backend. Pour éviter de complexifier
+inutilement le projet, nous choisissons de nous concentrer sur le backend, tout
+en servant un front minimal via JSP/Thymeleaf intégré.
+
+Cette approche permet de :
+
+- Se concentrer sur la logique métier essentielle
+
+- Avoir un développement et un déploiement rapides
+
+- Préparer une structure évolutive pour les phases futures (microservices /
+  event-driven)
+
+#### Décision
+
+Nous choisissons une architecture monolithique modulaire, organisée en couches
+logiques :
+
+- Controllers / Adapters Web : points d’entrée REST et JSP/Thymeleaf
+
+- Domain / Services Applicatifs : logique métier et règles pré-trade
+
+- Repository / Adapters Persistance : accès aux données via ORM (Spring Data
+  JPA)
+
+Le front JSP est intégré au backend, permettant de servir les pages web
+directement depuis le même projet Spring Boot. Aucun projet front séparé n’est
+nécessaire pour cette phase.
+
+#### Conséquences
+
+- Développement et tests rapides pour la phase 1.
+
+- Déploiement simplifié : un seul jar/war ou un conteneur Docker unique
+  suffit pour front + backend. + un autre conteneur pour postgre
+
+- Structure modulaire qui permet une migration vers microservices ou
+  event-driven plus tard, en découpant les modules (orders, portfolio, user,
+  etc.).
+
+#### Alternatives considérées
+
+- Microservices dès le départ : trop complexe pour un prototype ; nécessite
+  orchestration, service discovery, message brokers.
+
+- Event-driven dès le départ : complexité inutile pour démonstration initiale et
+  tests.
+- Single Page Application (SPA) : Séparer le front et le back est une bonne
+  pratique dans l’industrie. Cependant, pour un projet comme celui-ci, cela
+  compliquerait inutilement le développement. L’application reste relativement
+  simple et ne nécessite pas une interface
+  très dynamique. Ainsi, rester sur Spring Boot et générer les pages HTML via
+  JSP est suffisant. De plus, comme le front
+  n’est pas la priorité, il est préférable de concentrer les ressources sur la
+  logique métier, la sécurité et la
+  persistance des données, qui sont essentielles pour une application de
+  courtage.
+
+### ADR 002 – Choix de la persistance
+
+#### Statut
+
+Acceptée
+
+#### Contexte
+
+BrokerX+ nécessite une gestion fiable des ordres, portefeuilles et comptes
+clients. La persistance doit assurer
+intégrité, transactions et évolutivité minimale pour le prototype.
+
+#### Décision
+
+- Utilisation d’une base relationnelle (PostgreSQL ou H2 pour prototype).
+
+- ORM Spring Data JPA pour mapper les entités Order, Client, Portfolio,
+  ExecutionReport.
+
+- Gestion des transactions via @Transactional.
+
+- Données seed pour démonstration des UC Must via script SQL
+
+#### Conséquences
+
+- CRUD robuste sur les entités critiques.
+
+- Rollback automatique en cas d’erreur.
+
+- Séparation claire entre domaine et persistance (adapter pattern).
+
+#### Alternatives considérées
+
+- DAO maison : plus flexible mais introduit du code boilerplate inutile.
+
+- Base NoSQL : possible pour flux temps réel, mais pas nécessaire pour phase 1
+  prototype.
+
+### ADR 003 – Gestion des erreurs et notifications
+
+#### Statut
+
+Acceptée
+
+#### Contexte
+
+Le système doit gérer les erreurs métier (fonds insuffisants, ordre invalide),
+les erreurs techniques (DB inaccessible) et notifier le client de façon
+cohérente. La stratégie doit être uniforme pour faciliter le débogage et la
+traçabilité.
+
+#### Décision
+
+- Implémentation d’un gestionnaire global d’exceptions dans Spring Boot (
+  @ControllerAdvice).
+
+- Retour de codes HTTP standard et messages clairs (400 pour validation, 409
+  pour conflits, etc.).
+
+- Notifications client via WebSocket ou events internes.
+
+#### Conséquences
+
+- Cohérence dans la gestion des erreurs.
+
+- Audit trail exploitable pour Back-Office.
+
+- Simplifie les tests unitaires et E2E (on peut mocker les notifications).
+
+#### Alternatives considérées
+
+- Gestion d’erreurs locale dans chaque service : difficile à maintenir, risque
+  d’incohérence.
+
+- Exceptions non capturées : rejet du prototype par manque de fiabilité.
 
 ## 10. Exigences qualité
 
@@ -222,7 +404,9 @@ tests sont mis en place :
     - Vérifie le système dans son ensemble, du point de vue de l’utilisateur
       final.
     - Permet de tester les déploiements et les interactions réelles dans un
-      contexte proche de la production.
+      contexte proche de la production en utilisant Selenium pour creer un
+      navigateur afin de reproduire les conditions exacte d'utilisation de
+      l'application.
 
 - **Automatisation des tests**
     - Intégrés au pipeline **CI/CD GitHub Actions**.
