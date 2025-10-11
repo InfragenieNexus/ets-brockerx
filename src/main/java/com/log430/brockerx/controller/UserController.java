@@ -1,102 +1,71 @@
 package com.log430.brockerx.controller;
 
+import com.log430.brockerx.dto.UserRequestDto;
+import com.log430.brockerx.dto.UserResponseDto;
 import com.log430.brockerx.entity.User;
+import com.log430.brockerx.mapper.UserMapper;
 import com.log430.brockerx.service.OTPService;
 import com.log430.brockerx.service.UserService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.concurrent.CompletableFuture;
+
+// ======= USER CONTROLLER =======
+@RestController
+@RequestMapping("/api/v1/user")
 public class UserController {
 
-    private final OTPService otpService;
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
-    public UserController(OTPService otpService, UserService userService) {
-        this.otpService = otpService;
-        this.userService = userService;
+    @Autowired
+    private OTPService otpService;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    // GET /api/users/{id}
+    @GetMapping("/{id}") public CompletableFuture<ResponseEntity<UserResponseDto>> getUser(@PathVariable Long id) {
+        return userService.findByIdAsync(id).thenApply(user -> {
+            if (user != null)
+                return ResponseEntity.ok(userMapper.toDto(user));
+            else
+                return ResponseEntity.notFound().build();
+        });
     }
 
-    // ======= LOGIN =======
-    @GetMapping("/login") public String showLoginForm(Model model) {
-        model.addAttribute("contentPage", "login.jsp");
-        return "layout";
+
+    // POST /api/users
+    @PostMapping public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto user) {
+        User savedUser = userService.save(user);
+        return ResponseEntity.status(201).body(userMapper.toDto(savedUser));
     }
 
-    @PostMapping("/login")
-    public String login(@RequestParam String email, @RequestParam String password, HttpSession session, Model model) {
-        try {
-            User user = userService.login(email, password);
-
-            if (user.isMfaEnabled()) {
-                session.setAttribute("userPendingMfa", user);
-                return "redirect:/verify-totp";
-            }
-
-            session.setAttribute("user", user);
-            return "redirect:/wallet/view?userId=" + user.getId();
-
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("contentPage", "login.jsp");
-            return "layout";
+    @PostMapping("/send-otp") public ResponseEntity<String> sendOtp(@RequestParam String email) {
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Utilisateur non trouvé");
         }
-    }
 
-    // ======= SIGNUP =======
-    @GetMapping("/signup") public String showSignupForm(Model model) {
-        model.addAttribute("contentPage", "signup.jsp");
-        return "layout";
-    }
-
-    @PostMapping("/signup")
-    public String signup(@RequestParam String email, @RequestParam String password, @RequestParam String phone,
-                         @RequestParam String firstName, @RequestParam String lastName, @RequestParam String address,
-                         @RequestParam String dateOfBirth, HttpSession session, Model model) {
-        try {
-            User user = userService.signup(email, password, phone, firstName, lastName, address, dateOfBirth);
-            session.setAttribute("userPending", user);
-            otpService.sendOTP(user);
-            return "redirect:/verify-otp";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("contentPage", "signup.jsp");
-            return "layout";
-        }
-    }
-
-    // ======= VERIFY OTP =======
-    @GetMapping("/verify-otp") public String showVerifyOtpForm(Model model) {
-        model.addAttribute("contentPage", "verify-otp.jsp");
-        return "layout";
+        otpService.sendOTP(user);
+        return ResponseEntity.ok("OTP envoyé !");
     }
 
     @PostMapping("/verify-otp")
-    public String verifyOtp(@RequestParam String otpCode, HttpSession session, Model model) {
-        User user = (User) session.getAttribute("userPending");
-        if (user == null) {
-            return "redirect:/signup";
-        }
+    public ResponseEntity<String> verifyOtp(@RequestParam String email, @RequestParam String code) {
+        User user = userService.findByEmail(email);
+        if (user == null)
+            return ResponseEntity.badRequest().body("Utilisateur non trouvé");
 
-        try {
-            userService.activateUserWithOtp(user, otpCode); // logique métier dans service
-            session.setAttribute("user", user); // session active
-            return "redirect:/wallet/view?userId=" + user.getId();
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("contentPage", "verify-otp.jsp");
-            return "layout";
-        }
+        boolean ok = otpService.verifyCode(user, code);
+        if (ok)
+            return ResponseEntity.ok("OTP validé !");
+        else
+            return ResponseEntity.status(401).body("OTP invalide");
     }
 
-    // ======= LOGOUT =======
-    @GetMapping("/logout") public String logout(HttpSession session) {
-        session.invalidate(); // supprime toutes les infos de session
-        return "redirect:/login"; // redirige vers la page de login
-    }
 
 }

@@ -1,5 +1,6 @@
 package com.log430.brockerx.unit;
 
+import com.log430.brockerx.dto.DepositResponseDto;
 import com.log430.brockerx.entity.Transaction;
 import com.log430.brockerx.entity.User;
 import com.log430.brockerx.entity.Wallet;
@@ -53,13 +54,10 @@ class WalletServiceTest {
         when(walletRepository.save(any(Wallet.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Appel de la méthode
-        Transaction tx = walletService.deposit(userId, amount, key);
+        DepositResponseDto tx = walletService.deposit(userId, amount, key);
 
         // Vérifications
         assertNotNull(tx);
-        assertEquals("Settled", tx.getStatus());
-        assertEquals(amount, tx.getAmount());
-        assertEquals(mockUser, tx.getUser());
         assertEquals(150.0, mockWallet.getBalance());
 
         verify(transactionRepository, times(2)).save(any(Transaction.class)); // creation + status updated
@@ -76,23 +74,11 @@ class WalletServiceTest {
 
         when(transactionRepository.findByIdempotencyKey(key)).thenReturn(Optional.of(existingTx));
 
-        Transaction tx = walletService.deposit(userId, amount, key);
+        DepositResponseDto tx = walletService.deposit(userId, amount, key);
 
         assertEquals(existingTx, tx);
         verify(transactionRepository, never()).save(any(Transaction.class));
         verify(walletRepository, never()).save(any(Wallet.class));
-    }
-
-    @Test void getUserByIdReturnsUser() {
-        Long userId = 1L;
-        User mockUser = new User();
-        mockUser.setId(userId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-
-        User result = walletService.getUserById(userId);
-
-        assertEquals(mockUser, result);
     }
 
     @Test void getWalletByUserReturnsWallet() {

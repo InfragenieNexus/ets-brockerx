@@ -23,7 +23,7 @@ VALUES ('2025-09-09',
         'Test',
         NULL,
         'User1',
-        '$2a$10$SVKgXR1u9UqF7QWVt63RauNr8W2viqBnQQVTrtRccqCkBwHVzRB/C',
+        '$2b$10$CjIShmW4TLQjRacq7igli./2M7H.H6hosHQwsfo2aSQ.qnsSjFs5O',
         '555-0101',
         'ACTIVE',
         NULL);
@@ -75,7 +75,7 @@ VALUES ('1985-12-01',
         'Bob',
         NULL,
         'Brown',
-        '$2a$10$yetanotherhashedpassword...',
+        '$2b$10$CjIShmW4TLQjRacq7igli./2M7H.H6hosHQwsfo2aSQ.qnsSjFs5O',
         '555-0303',
         'PENDING',
         NULL);
@@ -127,3 +127,25 @@ INSERT INTO transactions (amount,
                           created_at,
                           user_id)
 VALUES (75.0, 'Failed', 'txn-0004', '2025-09-25 15:30:00', 3);
+
+-- ======================
+-- ORDERS
+-- ======================
+INSERT INTO orders (user_id, symbol, side, type, quantity, price, time_in_force,
+                    status, created_at, idempotency_key)
+VALUES (2, 'AAPL', 'BUY', 'LIMIT', 10, 150.00, 'DAY', 'ACK', NOW(), 'seed-1'),
+       (2, 'AAPL', 'SELL', 'LIMIT', 5, 152.00, 'DAY', 'ACK', NOW(), 'seed-2'),
+       (2, 'GOOG', 'BUY', 'MARKET', 20, 200.00, 'IOC', 'ACK', NOW(), 'seed-3'),
+       (2, 'TSLA', 'SELL', 'LIMIT', 15, 240.50, 'DAY', 'ACK', NOW(), 'seed-4');
+
+-- ======================
+-- POSITIONS
+-- ======================
+
+INSERT INTO positions (user_id, symbol, quantity)
+VALUES (1, 'AAPL', 20), -- L'utilisateur 1 possède 20 actions AAPL
+       (1, 'GOOG', 5),  -- L'utilisateur 1 possède 5 actions GOOG
+       (2, 'AAPL', 10), -- L'utilisateur 2 possède 10 actions AAPL
+       (2, 'TSLA', 8),  -- L'utilisateur 2 possède 8 actions TSLA
+       (3, 'GOOG', 12), -- L'utilisateur 3 possède 12 actions GOOG
+       (3, 'TEST', 10);

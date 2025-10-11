@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +48,7 @@ class UserServiceTest {
     }
 
     @Test void signupThrowsExceptionWhenEmailExists() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(new User());
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(new User()));
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                                            () -> userService.signup("test@example.com", "password", "123456", "John",
@@ -89,7 +90,7 @@ class UserServiceTest {
         user.setEmail("user@test.com");
         user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("password"));
 
-        when(userRepository.findByEmail("user@test.com")).thenReturn(user);
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
 
         User result = userService.login("user@test.com", "password");
         assertNotNull(result);
@@ -101,7 +102,7 @@ class UserServiceTest {
         user.setEmail("user@test.com");
         user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("password"));
 
-        when(userRepository.findByEmail("user@test.com")).thenReturn(user);
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                                            () -> userService.login("user@test.com", "wrong"));

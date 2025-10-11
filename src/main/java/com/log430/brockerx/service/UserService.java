@@ -1,15 +1,20 @@
 package com.log430.brockerx.service;
 
+import com.log430.brockerx.dto.UserRequestDto;
 import com.log430.brockerx.entity.User;
 import com.log430.brockerx.entity.Wallet;
+import com.log430.brockerx.mapper.UserMapper;
 import com.log430.brockerx.repository.UserRepository;
 import com.log430.brockerx.repository.WalletRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UserService {
@@ -17,15 +22,31 @@ public class UserService {
     private final WalletRepository walletRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final OTPService otpService;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, WalletRepository walletRepository, OTPService otpService) {
+    public UserService(UserRepository userRepository, WalletRepository walletRepository, OTPService otpService,
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.otpService = otpService;
+        this.userMapper = userMapper;
     }
 
-    public User save(User user) {
-        return userRepository.save(user);
+    @Async("applicationTaskExecutor") public CompletableFuture<User> findByIdAsync(Long id) {
+        User user = this.userRepository.findById(id).orElse(null);
+        return CompletableFuture.completedFuture(user);
+    }
+
+
+    public User save(UserRequestDto user) {
+
+        User savedUser = userMapper.toEntity(user);
+
+        if (user.getStatus() == null) {
+            user.setStatus(Optional.of(User.Status.PENDING));
+        }
+
+        return userRepository.save(savedUser);
     }
 
     @Transactional public User createUser(User user) {
@@ -46,7 +67,7 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email).orElseThrow();
     }
 
     @Transactional
@@ -78,9 +99,9 @@ public class UserService {
         user.setStatus(User.Status.ACTIVE);
         userRepository.save(user);
     }
-    
+
     public User login(String email, String rawPassword) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow();
         if (user == null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new IllegalArgumentException("Email ou mot de passe incorrect");
         }

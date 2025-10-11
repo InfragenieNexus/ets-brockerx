@@ -1,0 +1,31 @@
+package com.log430.brockerx.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+
+@Entity
+@Table(name = "orders")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    private String symbol;
+    private String side;
+    private String type;
+    private Double quantity;
+    private Double price;
+    private String timeInForce;
+    private String status;
+    private Instant createdAt;
+    private String idempotencyKey;
+}
