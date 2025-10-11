@@ -14,7 +14,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
                 // Swagger UI + API Docs
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml",
-                                 "/actuator/prometheus").permitAll()
+                                 "/actuator/**").permitAll()
                 // H2 console si tu l'utilises
                 .requestMatchers("/h2-console/**").permitAll()
                 // Route pour créer un utilisateur
