@@ -11,10 +11,16 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     @Bean public OpenAPI customOpenAPI() {
-        return new OpenAPI().info(new Info().title("BrockerX API").version("v1")
-                                            .description("API REST pour la gestion des utilisateurs et wallets"))
-                            .addSecurityItem(new SecurityRequirement().addList("basicAuth")).components(
-                        new io.swagger.v3.oas.models.Components().addSecuritySchemes("basicAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP).scheme("basic")));
+        final String securitySchemeName = "bearerAuth";
+
+        return new OpenAPI().info(new Info().title("BrokerX API").version("1.0.0")
+                                            .description("Documentation de l’API BrokerX")).addSecurityItem(
+                new SecurityRequirement().addList(securitySchemeName)).components(
+                new io.swagger.v3.oas.models.Components().addSecuritySchemes(securitySchemeName,
+                                                                             new SecurityScheme().name(
+                                                                                                         securitySchemeName).type(
+                                                                                                         SecurityScheme.Type.HTTP)
+                                                                                                 .scheme("bearer")
+                                                                                                 .bearerFormat("JWT")));
     }
 }

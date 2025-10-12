@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -22,11 +24,14 @@ public class OrderController {
 
 
     @PostMapping public ResponseEntity<OrderResponseDto> placeOrder(@RequestBody @Valid OrderRequestDto request,
-                                                                    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
-                                                                    Principal principal) {
+                                                                    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
-        log.info("Order {} placed by User: {}", request.toString(), principal.getName());
-        request.setEmailUser(principal.getName());
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        log.info("Order {} placed by User: {}", request.toString(), email);
+        request.setEmailUser(email);
+
         OrderResponseDto response = orderService.placeOrder(request, idempotencyKey);
         if ("REJECT".equals(response.getStatus())) {
             return ResponseEntity.badRequest().body(response);

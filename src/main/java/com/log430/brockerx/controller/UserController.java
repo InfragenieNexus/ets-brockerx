@@ -1,9 +1,11 @@
 package com.log430.brockerx.controller;
 
+import com.log430.brockerx.dto.LoginRequestDto;
 import com.log430.brockerx.dto.UserRequestDto;
 import com.log430.brockerx.dto.UserResponseDto;
 import com.log430.brockerx.entity.User;
 import com.log430.brockerx.mapper.UserMapper;
+import com.log430.brockerx.service.JwtService;
 import com.log430.brockerx.service.OTPService;
 import com.log430.brockerx.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 // ======= USER CONTROLLER =======
@@ -27,6 +30,9 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private JwtService jwtService;
+
     // GET /api/users/{id}
     @GetMapping("/{id}") public CompletableFuture<ResponseEntity<UserResponseDto>> getUser(@PathVariable Long id) {
         return userService.findByIdAsync(id).thenApply(user -> {
@@ -35,6 +41,12 @@ public class UserController {
             else
                 return ResponseEntity.notFound().build();
         });
+    }
+
+    @PostMapping("/login") public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
+        userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        String token = jwtService.generateToken(loginRequest.getEmail());
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
 

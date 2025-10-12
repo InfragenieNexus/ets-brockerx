@@ -2,14 +2,14 @@ import http from 'k6/http';
 import {check, sleep} from 'k6';
 
 export let options = {
-    vus: 2,              // un seul thread (il exécute en boucle les échanges)
+    vus: 50,              // un seul thread (il exécute en boucle les échanges)
     duration: '300s',    // 5 minutes
 };
 
 // Définition fixe des utilisateurs
 const testUser = {
     email: "test.test@hotmail.com",
-    auth: "Basic dGVzdC50ZXN0QGhvdG1haWwuY29tOnRlc3Q=",
+    auth: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LnRlc3RAaG90bWFpbC5jb20iLCJpYXQiOjE3NjAyODQ3NjMsImV4cCI6MTc2MDI4ODM2M30.XW3W3RydZnkJZeksmcDWM5SYXbGHxmarAwg7kRaBHzg",
     symbols: ["AAPL", "GOOG"]
 };
 
@@ -35,7 +35,7 @@ function createOrder(user, side, symbol, price, quantity, type = "LIMIT", timeIn
 export default function () {
     const url = "http://brockerx:8080/api/order";
 
-    const symbol = "AAPL"; // alterne symboles pour variation
+    const symbol = "AAPL";
     const price = 150;
     const quantity = 5;
 

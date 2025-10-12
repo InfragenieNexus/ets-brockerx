@@ -1,34 +1,33 @@
 package com.log430.brockerx.config;
 
+import com.log430.brockerx.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
-                // Swagger UI + API Docs
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml",
-                                 "/actuator/**").permitAll()
-                // H2 console si tu l'utilises
-                .requestMatchers("/h2-console/**").permitAll()
-                // Route pour créer un utilisateur
-                .requestMatchers("/api/v1/user").permitAll()
-                // Tout le reste → besoin d'être authentifié
-                .anyRequest().authenticated()).httpBasic();
+    private final JwtAuthFilter jwtAuthFilter;
 
-        // Nécessaire pour H2 Console
-        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
-
-        return http.build();
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    @Bean public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(9);
+    @Bean public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/user/login",
+                                                                                             "/swagger-ui/**",
+                                                                                             "/v3/api-docs/**",
+                                                                                             "/actuator/**").permitAll()
+                                                                            .anyRequest().authenticated())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }
