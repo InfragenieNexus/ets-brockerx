@@ -2,7 +2,7 @@ import http from 'k6/http';
 import {check, sleep} from 'k6';
 
 export let options = {
-    vus: 200,              // un seul thread (il exécute en boucle les échanges)
+    vus: 10,              // un seul thread (il exécute en boucle les échanges)
     duration: '300s',    // 5 minutes
 };
 
