@@ -47,7 +47,7 @@ export default function (data) {
     const authHeader = `Bearer ${data.token}`;
 
     const url = "http://brockerx:8080/api/order";
-    const symbol = "AAPL";
+    const symbol = "TSLA";
     const price = 150;
     const quantity = 5;
 

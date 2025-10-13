@@ -22,7 +22,7 @@ public class MatchingEngineService {
     }
 
     @Transactional public void processNewOrder(Order newOrder) {
-        log.info("📥 Received new order: id={}, user={}, side={}, symbol={}, qty={}, price={}", newOrder.getId(),
+        log.info("Received new order: id={}, user={}, side={}, symbol={}, qty={}, price={}", newOrder.getId(),
                  newOrder.getUser() != null ? newOrder.getUser().getEmail() : "unknown", newOrder.getSide(),
                  newOrder.getSymbol(), newOrder.getQuantity(), newOrder.getPrice());
 
@@ -49,13 +49,11 @@ public class MatchingEngineService {
 
             orderRepository.save(o);
 
-            // 🧩 Création du trade
             TradeDTO trade = new TradeDTO();
             trade.setSymbol(newOrder.getSymbol());
             trade.setQuantity(matchedQty);
             trade.setPrice(o.getPrice());
 
-            // Identification des participants
             if (newOrder.getSide().equalsIgnoreCase("BUY")) {
                 trade.setBuyerId(newOrder.getUser().getId());
                 trade.setSellerId(o.getUser().getId());
@@ -64,7 +62,6 @@ public class MatchingEngineService {
                 trade.setSellerId(newOrder.getUser().getId());
             }
 
-            // ⚙️ Exécution du règlement
             tradeService.handleTrade(trade);
 
             log.info("💱 Trade executed and settled: {} {} @ {} (buyer={}, seller={})", matchedQty, newOrder.getSymbol(),

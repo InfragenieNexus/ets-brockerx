@@ -44,8 +44,9 @@ public class UserController {
     }
 
     @PostMapping("/login") public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
-        userService.login(loginRequest.getEmail(), loginRequest.getPassword());
-        String token = jwtService.generateToken(loginRequest.getEmail());
+        User user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+
+        String token = jwtService.generateToken(user);
         return ResponseEntity.ok(Map.of("token", token));
     }
 

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")  // table "users"
+@Table(name = "users", indexes = {@Index(name = "idx_user_email", columnList = "email")})
 public class User {
 
     public enum Status {PENDING, ACTIVE, REJECTED}
