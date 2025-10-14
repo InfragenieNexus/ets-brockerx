@@ -2,9 +2,11 @@ package com.log430.brockerx.controller;
 
 import com.log430.brockerx.dto.DepositRequestDto;
 import com.log430.brockerx.dto.DepositResponseDto;
+import com.log430.brockerx.service.CustomUserDetails;
 import com.log430.brockerx.service.WalletService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +25,14 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @PostMapping("/deposit") public ResponseEntity<DepositResponseDto> deposit(@PathVariable Long userId,
-                                                                               @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
-                                                                               @Valid @RequestBody DepositRequestDto req,
-                                                                               Principal principal) {
+    @PostMapping("/deposit")
+    public ResponseEntity<DepositResponseDto> deposit(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                      @PathVariable Long userId,
+                                                      @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+                                                      @Valid @RequestBody DepositRequestDto req) {
 
-        log.info("User: {} has deposited : {}", principal.getName(), req.getAmount());
+
+        log.info("User: {} has deposited : {}", userDetails.getUsername(), req.getAmount());
 
         DepositResponseDto res = walletService.deposit(userId, req.getAmount(), idempotencyKey);
         return ResponseEntity.ok(res);

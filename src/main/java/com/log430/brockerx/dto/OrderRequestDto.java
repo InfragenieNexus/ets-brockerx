@@ -15,4 +15,5 @@ public class OrderRequestDto {
     private Double price;        // uniquement si LIMIT
     private String timeInForce;  // "DAY", "IOC", "FOK"
     private String emailUser;
+    private Long userId;
 }

@@ -11,3 +11,8 @@ Pour regarder les donnees en temps relles il suffit d'aller sur le lien :
 
 Dashboard Grafana Api Rest monolithique
 
+- On as environ 100 req/s
+- latence de 800ms
+- No failure
+
+![img.png](img.png)

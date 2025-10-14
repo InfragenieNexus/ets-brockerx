@@ -2,12 +2,14 @@ package com.log430.brockerx.controller;
 
 import com.log430.brockerx.dto.OrderRequestDto;
 import com.log430.brockerx.dto.OrderResponseDto;
+import com.log430.brockerx.service.CustomUserDetails;
 import com.log430.brockerx.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +25,14 @@ public class OrderController {
     private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
 
-    @PostMapping public ResponseEntity<OrderResponseDto> placeOrder(@RequestBody @Valid OrderRequestDto request,
-                                                                    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+    @PostMapping
+    public ResponseEntity<OrderResponseDto> placeOrder(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @RequestBody @Valid OrderRequestDto request,
+                                                       @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
 
-        log.info("Order {} placed by User: {}", request.toString(), email);
-        request.setEmailUser(email);
+        log.info("Order {} placed by User: {}", request.toString(), userDetails.getUsername());
+        request.setUserId(userDetails.getId());
 
         OrderResponseDto response = orderService.placeOrder(request, idempotencyKey);
         if ("REJECT".equals(response.getStatus())) {
