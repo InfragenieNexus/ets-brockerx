@@ -16,13 +16,6 @@ jobs:
       - name: Check Java Version
         run: java -version
 
-      - name: Set Java 17
-        run: |
-          sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk-amd64/bin/java 1
-          sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-          java -version
-
-
       - name: Générer .env pour Docker
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}" > .env
