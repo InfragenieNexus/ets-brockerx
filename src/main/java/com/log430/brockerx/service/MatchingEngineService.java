@@ -13,6 +13,9 @@ import java.util.List;
 @Service
 public class MatchingEngineService {
 
+    private static final String SELL = "SELL";
+    private static final String BUY = "BUY";
+
     private final OrderRepository orderRepository;
     private final TradeService tradeService;
 
@@ -26,10 +29,13 @@ public class MatchingEngineService {
                  newOrder.getUser() != null ? newOrder.getUser().getEmail() : "unknown", newOrder.getSide(),
                  newOrder.getSymbol(), newOrder.getQuantity(), newOrder.getPrice());
 
-        List<Order> oppositeOrders = orderRepository.findMatchingOrders(newOrder.getSymbol(),
-                                                                        newOrder.getSide().equalsIgnoreCase("BUY")
-                                                                        ? "SELL" : "BUY", newOrder.getPrice(),
-                                                                        newOrder.getSide());
+        List<Order> oppositeOrders;
+
+        if (newOrder.getSide().equals(BUY)) {
+            oppositeOrders = orderRepository.findBuyMatchingOrders(newOrder.getSymbol(), newOrder.getPrice());
+        } else {
+            oppositeOrders = orderRepository.findSellMatchingOrders(newOrder.getSymbol(), newOrder.getPrice());
+        }
 
 
         double remainingQty = newOrder.getQuantity();
