@@ -13,10 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fix permissions
+      - name: Clean workspace
         run: |
           sudo chown -R log430:log430 ${{ github.workspace }}
           chmod -R u+rwx ${{ github.workspace }}
+          rm -rf ${{ github.workspace }}/*
 
       - name: Check Java Version
         run: java -version
