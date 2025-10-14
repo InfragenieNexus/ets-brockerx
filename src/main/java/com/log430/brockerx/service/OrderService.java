@@ -25,10 +25,8 @@ public class OrderService {
 
     public OrderResponseDto placeOrder(OrderRequestDto request, String idempotencyKey) {
 
-        User user = userRepository.findByEmail(request.getEmailUser()).orElseThrow(
-                () -> new RuntimeException("User not found"));
-
-        Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);
+        User user = userRepository.findById(request.getUserId()).orElseThrow();
+        Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);//Could be opti
         if (existing.isPresent()) {
             Order order = existing.get();
             return new OrderResponseDto(order.getId().toString(), order.getStatus(), null, order.getCreatedAt());
