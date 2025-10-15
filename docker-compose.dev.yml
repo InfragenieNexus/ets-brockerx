@@ -1,11 +1,12 @@
 version: "3.9"
 
 services:
-  # --- APP SPRING BOOT ---
+  # --- APP SPRING BOOT MASTER ---
   brockerx1:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    container_name: brockerx-master
     ports:
       - "8081:8080"
     volumes:
@@ -13,18 +14,21 @@ services:
       - ./pom.xml:/app/pom.xml
       - ./target:/app/target
     environment:
-      SPRING_PROFILES_ACTIVE: dev, db-master
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: db-master,dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/brockerx
+      SPRING_DATASOURCE_USERNAME: brockerx
+      SPRING_DATASOURCE_PASSWORD: brockerx
     command: mvn spring-boot:run
     depends_on:
       - db
+    restart: always
 
+  # --- APP SPRING BOOT SLAVE ---
   brockerx2:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    container_name: brockerx-slave
     ports:
       - "8082:8080"
     volumes:
@@ -32,26 +36,28 @@ services:
       - ./pom.xml:/app/pom.xml
       - ./target:/app/target
     environment:
-      SPRING_PROFILES_ACTIVE: dev, db-slave
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: db-slave,dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/brockerx
+      SPRING_DATASOURCE_USERNAME: brockerx
+      SPRING_DATASOURCE_PASSWORD: brockerx
     command: mvn spring-boot:run
     depends_on:
       - db
+    restart: always
 
   # --- BASE DE DONNÉES ---
   db:
     image: postgres:15
     container_name: brockerx-db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: brockerx
+      POSTGRES_PASSWORD: brockerx
+      POSTGRES_DB: brockerx
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: always
 
   # --- PROMETHEUS ---
   prometheus:
@@ -64,6 +70,7 @@ services:
     depends_on:
       - brockerx1
       - brockerx2
+    restart: always
 
   # --- GRAFANA ---
   grafana:
@@ -73,6 +80,9 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: always
 
   # --- K6 (TESTS DE CHARGE) ---
   k6:
@@ -80,9 +90,10 @@ services:
     container_name: k6
     volumes:
       - ./k6:/scripts
-    ports:
-      - "6565:6565"
     entrypoint: [ "sleep", "infinity" ]
+    restart: always
+
+  # --- NGINX LOAD BALANCER ---
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -93,7 +104,7 @@ services:
     depends_on:
       - brockerx1
       - brockerx2
-
+    restart: always
 
 volumes:
   postgres_data:
