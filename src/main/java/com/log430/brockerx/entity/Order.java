@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {@Index(name = "idx_symbol_side_status_price_createdAt", columnList = "symbol, side, status, price, createdAt"), @Index(name = "idx_idempotency_key", columnList = "idempotencyKey")})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,9 +16,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
     private String symbol;
     private String side;
     private String type;
