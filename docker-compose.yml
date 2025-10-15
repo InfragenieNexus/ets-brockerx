@@ -37,7 +37,14 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-    command: mvn spring-boot:run
+    entrypoint: >
+      sh -c "
+        until pg_isready -h db -p 5432 -U $DB_USER; do
+          echo 'Waiting for database...';
+          sleep 2;
+        done;
+        mvn spring-boot:run
+      "
     depends_on:
       - db
 
