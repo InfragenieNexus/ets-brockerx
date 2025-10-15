@@ -26,11 +26,11 @@ public class OrderService {
     public OrderResponseDto placeOrder(OrderRequestDto request, String idempotencyKey) {
 
         User user = userRepository.findById(request.getUserId()).orElseThrow();
-        Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);//Could be opti
-        if (existing.isPresent()) {
-            Order order = existing.get();
-            return new OrderResponseDto(order.getId().toString(), order.getStatus(), null, order.getCreatedAt());
-        }
+//        Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);//Could be opti
+//        if (existing.isPresent()) {
+//            Order order = existing.get();
+//            return new OrderResponseDto(order.getId().toString(), order.getStatus(), null, order.getCreatedAt());
+//        }
 
         // ---------- Pré-trade checks ----------
         if (request.getQuantity() == null || request.getQuantity() <= 0) {

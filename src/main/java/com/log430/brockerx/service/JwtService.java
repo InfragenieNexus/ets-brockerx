@@ -18,7 +18,7 @@ import javax.crypto.SecretKey;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = String.valueOf(Keys.secretKeyFor(SignatureAlgorithm.HS256));
+    private static final String SECRET_KEY = "MaCleSecreteTr3sLonguejaelfiajsefliajsfelaisjfeiajsfeliasj12334"; // ou
     private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1h
 
     private Key getSigningKey() {

@@ -2,18 +2,37 @@ version: "3.9"
 
 services:
   # --- APP SPRING BOOT ---
-  brockerx:
+  brockerx1:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "8080:8080"
+      - "8081:8080"
     volumes:
       - ./src:/app/src
       - ./pom.xml:/app/pom.xml
       - ./target:/app/target
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev, db-master
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    command: mvn spring-boot:run
+    depends_on:
+      - db
+
+  brockerx2:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+      - ./target:/app/target
+    environment:
+      SPRING_PROFILES_ACTIVE: dev, db-slave
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
@@ -43,7 +62,8 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
-      - brockerx
+      - brockerx1
+      - brockerx2
 
   # --- GRAFANA ---
   grafana:
@@ -63,6 +83,16 @@ services:
     ports:
       - "6565:6565"
     entrypoint: [ "sleep", "infinity" ]
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - brockerx1
+      - brockerx2
 
 
 volumes:

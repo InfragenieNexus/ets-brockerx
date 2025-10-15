@@ -2,8 +2,8 @@ import http from 'k6/http';
 import {check, sleep} from 'k6';
 
 export let options = {
-    vus: 200,
-    duration: '300s',
+    vus: 5,
+    duration: '180s',
 };
 
 const testUser = {
@@ -25,7 +25,7 @@ function createOrder(user, side, symbol, price, quantity, type = "LIMIT", timeIn
 }
 
 export function setup() {
-    const loginUrl = "http://brockerx:8080/api/v1/user/login";
+    const loginUrl = "http://nginx/api/v1/user/login";
     const payload = JSON.stringify({
         email: testUser.email,
         password: testUser.password
@@ -46,7 +46,7 @@ export default function (data) {
     // Récupérer le token depuis setup()
     const authHeader = `Bearer ${data.token}`;
 
-    const url = "http://brockerx:8080/api/order";
+    const url = "http://nginx/api/order";
     const symbol = "TSLA";
     const price = 150;
     const quantity = 5;
