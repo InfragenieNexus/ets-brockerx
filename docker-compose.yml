@@ -37,9 +37,10 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-    entrypoint: [ "/wait-for-it.sh", "db:5432", "--timeout=30", "--strict", "--", "mvn", "spring-boot:run" ]
+    command: mvn spring-boot:run
     depends_on:
       - db
+
 
   # --- BASE DE DONNÉES ---
   db:
