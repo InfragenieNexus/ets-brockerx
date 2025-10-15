@@ -8,6 +8,10 @@ RUN mvn dependency:go-offline -B
 # Copier le code source
 COPY src ./src
 
+# Copier le script wait-for-it
+COPY wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
 EXPOSE 8080
 
 CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]
