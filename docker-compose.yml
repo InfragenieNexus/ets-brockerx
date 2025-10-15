@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # --- APP SPRING BOOT ---
+  # --- APP SPRING BOOT MASTER ---
   brockerx1:
     build:
       context: .
@@ -13,7 +13,7 @@ services:
       - ./pom.xml:/app/pom.xml
       - ./target:/app/target
     environment:
-      SPRING_PROFILES_ACTIVE: dev, db-master
+      SPRING_PROFILES_ACTIVE: db-master,dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
@@ -21,6 +21,7 @@ services:
     depends_on:
       - db
 
+  # --- APP SPRING BOOT SLAVE ---
   brockerx2:
     build:
       context: .
@@ -32,7 +33,7 @@ services:
       - ./pom.xml:/app/pom.xml
       - ./target:/app/target
     environment:
-      SPRING_PROFILES_ACTIVE: dev, db-slave
+      SPRING_PROFILES_ACTIVE: db-slave,dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
@@ -83,6 +84,7 @@ services:
     ports:
       - "6565:6565"
     entrypoint: [ "sleep", "infinity" ]
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -93,7 +95,6 @@ services:
     depends_on:
       - brockerx1
       - brockerx2
-
 
 volumes:
   postgres_data:
